@@ -28,13 +28,12 @@ for ur in urls:
         page = lxml.html.fromstring(r.read())
         for tag in tags:
                 for link in page.xpath(tag):
-                        if not link.startswith('http'):
-                                if link.startswith('//'):
-                                        links_other.append(http + link)
-                                elif link.startswith('/static/'):
-                                        links_static.append(link)
-                                else: 
-                                        links_other.append(head + link)
-                        else: 
+                        if link.startswith('http'): 
                                 links_other.append(link)
+                        elif link.startswith('//'):
+                                links_other.append(http + link)
+                        elif link.startswith('/static/'):
+                                links_static.append(link)
+                        else: 
+                                links_other.append(head + link)
 unique_url = list(set(links_other)) # delete duplicate log lines

@@ -39,11 +39,14 @@ def grp_render_dashboard(context, location='index', dashboard=None):
 
     dashboard.init_with_context(context)
 
-    context.update({
-        'template': dashboard.template,
-        'dashboard': dashboard,
-        'admin_url': reverse('%s:index' % get_admin_site_name(context)),
-    })
+    context.update(
+        {
+            'template': dashboard.template,
+            'dashboard': dashboard,
+            'admin_url': reverse(f'{get_admin_site_name(context)}:index'),
+        }
+    )
+
     return context
 grp_render_dashboard = tag_func(grp_render_dashboard)
 
@@ -56,12 +59,15 @@ def grp_render_dashboard_module(context, module, index=None, subindex=None):
     """
 
     module.init_with_context(context)
-    context.update({
-        'template': module.template,
-        'module': module,
-        'index': index,
-        'subindex': subindex,
-        'admin_url': reverse('%s:index' % get_admin_site_name(context)),
-    })
+    context.update(
+        {
+            'template': module.template,
+            'module': module,
+            'index': index,
+            'subindex': subindex,
+            'admin_url': reverse(f'{get_admin_site_name(context)}:index'),
+        }
+    )
+
     return context
 grp_render_dashboard_module = tag_func(grp_render_dashboard_module)

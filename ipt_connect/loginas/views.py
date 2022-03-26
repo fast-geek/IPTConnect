@@ -31,9 +31,7 @@ def _load_module(path):
     try:
         mod = import_module(module)
     except ImportError:
-        raise ImproperlyConfigured(
-            'Error importing CAN_LOGIN_AS function: {}'.format(module)
-        )
+        raise ImproperlyConfigured(f'Error importing CAN_LOGIN_AS function: {module}')
     except ValueError:
         raise ImproperlyConfigured('Error importing CAN_LOGIN_AS'
                                    ' function. Is CAN_LOGIN_AS a'

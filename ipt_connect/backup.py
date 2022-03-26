@@ -33,10 +33,12 @@ class Backup(object):
         """
         Return absolute path to last backup database. If backup doesn't exist return False.
         """
-        dbs = []
-        for x in os.listdir(Backup.BACKUPS_DIR):
-            if x.endswith('.sqlite3'):
-                dbs.append((x, os.path.getctime(os.path.join(Backup.BACKUPS_DIR, x))))
+        dbs = [
+            (x, os.path.getctime(os.path.join(Backup.BACKUPS_DIR, x)))
+            for x in os.listdir(Backup.BACKUPS_DIR)
+            if x.endswith('.sqlite3')
+        ]
+
         if not len(dbs):
             return False
         last_db = max(dbs, key=lambda x: x[1])
@@ -50,14 +52,17 @@ class Backup(object):
         if not last_db_path:
             return True  # If backups doesn't exist return True
         last_db = open(last_db_path, 'rb').read()
-        return not hashlib.md5(self.db_file.read()).hexdigest() == hashlib.md5(last_db).hexdigest()
+        return (
+            hashlib.md5(self.db_file.read()).hexdigest()
+            != hashlib.md5(last_db).hexdigest()
+        )
 
     def local_backup(self):
         """
         Backup database to local folder.
         """
         now = datetime.datetime.now()
-        new_name = 'db_{}.sqlite3'.format(now.strftime("%Y-%m-%d_%H-%M-%S"))
+        new_name = f'db_{now.strftime("%Y-%m-%d_%H-%M-%S")}.sqlite3'
         try:
             shutil.copyfile(self.db_path, os.path.join(Backup.BACKUPS_DIR, new_name))
         except:

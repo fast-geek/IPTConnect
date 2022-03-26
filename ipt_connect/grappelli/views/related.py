@@ -73,9 +73,7 @@ class RelatedLookup(View):
 
     def get_filtered_queryset(self, qs):
         filters = {}
-        query_string = self.GET.get('query_string', None)
-
-        if query_string:
+        if query_string := self.GET.get('query_string', None):
             for item in query_string.split(":"):
                 k, v = item.split("=")
                 if k != "_to_field":
@@ -88,9 +86,8 @@ class RelatedLookup(View):
         return qs
 
     def get_data(self):
-        obj_id = self.GET['object_id']
         data = []
-        if obj_id:
+        if obj_id := self.GET['object_id']:
             try:
                 obj = self.get_queryset().get(pk=obj_id)
                 data.append({"value": obj_id, "label": get_label(obj)})
@@ -144,8 +141,7 @@ class AutocompleteLookup(RelatedLookup):
         except AttributeError:
             pass
 
-        search_fields = get_autocomplete_search_fields(self.model)
-        if search_fields:
+        if search_fields := get_autocomplete_search_fields(self.model):
             for word in term.split():
                 search = [models.Q(**{smart_text(item): smart_text(word)}) for item in search_fields]
                 search_qs = QuerySet(model)
@@ -160,12 +156,11 @@ class AutocompleteLookup(RelatedLookup):
         qs = super(AutocompleteLookup, self).get_queryset()
         qs = self.get_filtered_queryset(qs)
         qs = self.get_searched_queryset(qs)
-        if connection.vendor == 'postgresql':
-            ordering = list(self.model._meta.ordering)
-            distinct_columns = [o.lstrip('-') for o in ordering] + [self.model._meta.pk.column]
-            return qs.order_by(*ordering).distinct(*distinct_columns)
-        else:
+        if connection.vendor != 'postgresql':
             return qs.distinct()
+        ordering = list(self.model._meta.ordering)
+        distinct_columns = [o.lstrip('-') for o in ordering] + [self.model._meta.pk.column]
+        return qs.order_by(*ordering).distinct(*distinct_columns)
 
     def get_data(self):
         return [{"value": f.pk, "label": get_label(f)} for f in self.get_queryset()[:AUTOCOMPLETE_LIMIT]]

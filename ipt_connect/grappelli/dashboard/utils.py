@@ -22,7 +22,7 @@ def _get_dashboard_cls(dashboard_cls, context):
             admin_site_mod, admin_site_inst = key.rsplit('.', 1)
             admin_site_mod = import_module(admin_site_mod)
             admin_site = getattr(admin_site_mod, admin_site_inst)
-            admin_url = reverse('%s:index' % admin_site.name)
+            admin_url = reverse(f'{admin_site.name}:index')
             if curr_url.startswith(admin_url):
                 mod, inst = dashboard_cls[key].rsplit('.', 1)
                 mod = import_module(mod)
@@ -53,19 +53,18 @@ def get_admin_site(context=None, request=None):
         'grappelli.dashboard.dashboards.DefaultIndexDashboard'
     )
 
-    if isinstance(dashboard_cls, dict):
-        if context:
-            request = context.get('request')
-        curr_url = request.path
-        for key in dashboard_cls:
-            mod, inst = key.rsplit('.', 1)
-            mod = import_module(mod)
-            admin_site = getattr(mod, inst)
-            admin_url = reverse('%s:index' % admin_site.name)
-            if curr_url.startswith(admin_url):
-                return admin_site
-    else:
+    if not isinstance(dashboard_cls, dict):
         return admin.site
+    if context:
+        request = context.get('request')
+    curr_url = request.path
+    for key in dashboard_cls:
+        mod, inst = key.rsplit('.', 1)
+        mod = import_module(mod)
+        admin_site = getattr(mod, inst)
+        admin_url = reverse(f'{admin_site.name}:index')
+        if curr_url.startswith(admin_url):
+            return admin_site
     raise ValueError('Admin site matching "%s" not found' % dashboard_cls)
 
 
@@ -93,7 +92,7 @@ def filter_models(request, models, exclude):
     """
     items = get_avail_models(request)
     included = []
-    full_name = lambda model: '%s.%s' % (model.__module__, model.__name__)
+    full_name = lambda model: f'{model.__module__}.{model.__name__}'
 
     # I beleive that that implemented
     # O(len(patterns)*len(matched_patterns)*len(all_models))
@@ -143,23 +142,22 @@ class AppListElementMixin(object):
         Returns the admin change url.
         """
         app_label = model._meta.app_label
-        return reverse('%s:app_list' % get_admin_site_name(context),
-                       args=(app_label,))
+        return reverse(f'{get_admin_site_name(context)}:app_list', args=(app_label,))
 
     def _get_admin_change_url(self, model, context):
         """
         Returns the admin change url.
         """
         app_label = model._meta.app_label
-        return reverse('%s:%s_%s_changelist' % (get_admin_site_name(context),
-                                                app_label,
-                                                model.__name__.lower()))
+        return reverse(
+            f'{get_admin_site_name(context)}:{app_label}_{model.__name__.lower()}_changelist'
+        )
 
     def _get_admin_add_url(self, model, context):
         """
         Returns the admin add url.
         """
         app_label = model._meta.app_label
-        return reverse('%s:%s_%s_add' % (get_admin_site_name(context),
-                                         app_label,
-                                         model.__name__.lower()))
+        return reverse(
+            f'{get_admin_site_name(context)}:{app_label}_{model.__name__.lower()}_add'
+        )

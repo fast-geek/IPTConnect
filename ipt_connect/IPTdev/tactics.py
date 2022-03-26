@@ -128,10 +128,9 @@ def sort_raw_tactics_data(problems_dict):
 		'opposed_by_opponent',
 		'reported_by_opponent',
 	]:
-		for problem in list(problems_dict)[::-1]:
-			if len(problems_dict[problem][reason]) > 0:
-				bans.append((problem, problems_dict.pop(problem)))
-
+		bans.extend((problem, problems_dict.pop(problem))
+		            for problem in list(problems_dict)[::-1]
+		            if len(problems_dict[problem][reason]) > 0)
 	# The second list consists of available problems
 
 	# Firstly, we collect the problems which the teams has already interacted with
@@ -144,15 +143,13 @@ def sort_raw_tactics_data(problems_dict):
 		'reviewed_by_reporter',
 		'tried_by_reporter',
 	]:
-		for problem in list(problems_dict):
-			if len(problems_dict[problem][reason]) > 0:
-				info.append((problem, problems_dict.pop(problem)))
-
+		info.extend((problem, problems_dict.pop(problem))
+		            for problem in list(problems_dict)
+		            if len(problems_dict[problem][reason]) > 0)
 	# And then we append all the other problems
 
-	for problem in list(problems_dict):
-		info.append((problem, problems_dict.pop(problem)))
-
+	info.extend(
+	    (problem, problems_dict.pop(problem)) for problem in list(problems_dict))
 	return bans, info
 
 
@@ -175,22 +172,7 @@ def make_old_fashioned_list_from_tactics_data(current_round):
 	]:
 		problems_to_sort = []
 		for problem in list(problems_dict):
-			for round in problems_dict[problem][reason]:
-				if (
-					# The reason comes from somewhere else (not a Round)
-					round == None
-				) or (
-					# The reasons comes from the previous Rounds of the same Fight
-					round.pf_number == current_round.pf_number
-					and
-					round.round_number < current_round.round_number
-					and
-					reason == 'presented_in_this_match'
-				) or (
-					# The reason comes from the previous Fights
-					round.pf_number < current_round.pf_number
-				):
-					problems_to_sort.append((
+			problems_to_sort.extend((
 						problem,
 						# TODO: get rid of `replace`s here!
 						reason.
@@ -201,7 +183,14 @@ def make_old_fashioned_list_from_tactics_data(current_round):
 							replace('reporter','Reporter')
 						,
 						round,
-					))
+					) for round in problems_dict[problem][reason] if round is None or (
+					# The reasons comes from the previous Rounds of the same Fight
+					round.pf_number == current_round.pf_number
+					and
+					round.round_number < current_round.round_number
+					and
+					reason == 'presented_in_this_match'
+				) or round.pf_number < current_round.pf_number)
 		problems_to_sort.sort(key=lambda x: x[0].pk)
 		forbidden_problems += problems_to_sort
 
@@ -223,7 +212,7 @@ class TacticsForm(forms.Form):
 		pass
 
 
-@user_passes_test(ninja_test, redirect_field_name=None, login_url='/%s/soon' % params.instance_name)
+@user_passes_test(ninja_test, redirect_field_name=None, login_url=f'/{params.instance_name}/soon')
 @cache_page(cache_duration)
 def build_tactics(request):
 	# if this is a POST request we need to process the form data
@@ -237,14 +226,20 @@ def build_tactics(request):
 				Team.objects.get(pk=form['opponent_team'].value()),
 			))
 			tactics = (tactics[0][::-1], tactics[1])
-			return render(request, '%s/build_tactics.html' % params.instance_name, {
+			return render(request, f'{params.instance_name}/build_tactics.html', {
 				'params': params,
 				'form': form,
 				'tactics': tactics,
 			})
 
-	# if a GET (or any other method) we'll create a blank form
 	else:
 		form = TacticsForm()
 
-	return render(request, '%s/build_tactics.html' % params.instance_name, {'params': params, 'form': form})
+	return render(
+	    request,
+	    f'{params.instance_name}/build_tactics.html',
+	    {
+	        'params': params,
+	        'form': form
+	    },
+	)

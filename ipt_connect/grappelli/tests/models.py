@@ -24,7 +24,7 @@ class Category(models.Model):
         return ("id__iexact", "name__icontains",)
 
     def related_label(self):
-        return "%s (%s)" % (self.name, self.id)
+        return f"{self.name} ({self.id})"
 
 
 @python_2_unicode_compatible

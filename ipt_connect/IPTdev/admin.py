@@ -109,17 +109,14 @@ class Roundadmin(admin.ModelAdmin):
 
 class TeamAdmin(admin.ModelAdmin):
 
-	if params.manual_bonus_points:
-		list_display = ('name','surname','IOC','bonus_points')
-	else:
-		list_display = ('name','surname','IOC')
-	search_fields = ('name','IOC')
+    if params.manual_bonus_points:
+    	list_display = ('name','surname','IOC','bonus_points')
+    else:
+    	list_display = ('name','surname','IOC')
+    search_fields = ('name','IOC')
 
-	inlines = []
-	if params.enable_apriori_rejections:
-		inlines = [AprioriRejectionInline]
-
-	inlines += [SupplementaryMaterialInline]
+    inlines = [AprioriRejectionInline] if params.enable_apriori_rejections else []
+    inlines += [SupplementaryMaterialInline]
 
 class ParticipantAdmin(admin.ModelAdmin):
 
@@ -128,18 +125,21 @@ class ParticipantAdmin(admin.ModelAdmin):
 	list_filter = ('team','gender','role','veteran','diet','shirt_size','mixed_gender_accommodation')
 
 	def save_model(self, request, obj, form, change):
-		if not(request.user.is_superuser) and not(request.user.username == 'magnusson'):
-			u = User.objects.get(username = request.user.username)
-			obj.team = getattr(u,'Team_'+params.instance_name)
-			obj.save()
-		obj.save()
+	    if (
+	        not (request.user.is_superuser)
+	        and request.user.username != 'magnusson'
+	    ):
+	        u = User.objects.get(username = request.user.username)
+	        obj.team = getattr(u, f'Team_{params.instance_name}')
+	        obj.save()
+	    obj.save()
 
 	def get_queryset(self,request):
-		qs = super(ParticipantAdmin,self).get_queryset(request)
-		u = User.objects.get(username = request.user.username)
-		if request.user.is_superuser or request.user.username == 'magnusson':
-			return qs
-		return qs.filter(team = getattr(u,'Team_'+params.instance_name))
+	    qs = super(ParticipantAdmin,self).get_queryset(request)
+	    u = User.objects.get(username = request.user.username)
+	    if request.user.is_superuser or request.user.username == 'magnusson':
+	    	return qs
+	    return qs.filter(team=getattr(u, f'Team_{params.instance_name}'))
 
 class JuryAdmin(admin.ModelAdmin):
 

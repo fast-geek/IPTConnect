@@ -38,7 +38,7 @@ class RelatedTests(TestCase):
 
         # add categories
         for i in range(100):
-            Category.objects.create(name="Category No %s" % (i))
+            Category.objects.create(name=f"Category No {i}")
 
         # add entries
         self.entry_superuser = Entry.objects.create(title="Entry Superuser",
@@ -73,40 +73,64 @@ class RelatedTests(TestCase):
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": None, "label": ""}])
 
         # ok
-        response = self.client.get("%s?object_id=1&app_label=%s&model_name=%s" % (reverse("grp_related_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=1&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Category No 0 (1)"}])
 
         # wrong object_id
-        response = self.client.get("%s?object_id=10000&app_label=%s&model_name=%s" % (reverse("grp_related_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=10000&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "10000", "label": "?"}])
 
         # filtered queryset (single filter) fails
-        response = self.client.get("%s?object_id=1&app_label=%s&model_name=%s&query_string=id__gte=99" % (reverse("grp_related_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=1&app_label=grappelli&model_name=category&query_string=id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "?"}])
 
         # filtered queryset (single filter) works
-        response = self.client.get("%s?object_id=100&app_label=%s&model_name=%s&query_string=id__gte=99" % (reverse("grp_related_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=100&app_label=grappelli&model_name=category&query_string=id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "100", "label": "Category No 99 (100)"}])
 
         # filtered queryset (multiple filters) fails
-        response = self.client.get("%s?object_id=1&app_label=%s&model_name=%s&query_string=name__icontains=99:id__gte=99" % (reverse("grp_related_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=1&app_label=grappelli&model_name=category&query_string=name__icontains=99:id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "?"}])
 
         # filtered queryset (multiple filters) works
-        response = self.client.get("%s?object_id=100&app_label=%s&model_name=%s&query_string=name__icontains=99:id__gte=99" % (reverse("grp_related_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=100&app_label=grappelli&model_name=category&query_string=name__icontains=99:id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "100", "label": "Category No 99 (100)"}])
 
         # custom queryset (Superuser)
-        response = self.client.get("%s?object_id=1&app_label=%s&model_name=%s" % (reverse("grp_related_lookup"), "grappelli", "entry"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=1&app_label=grappelli&model_name=entry'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Entry Superuser"}])
-        response = self.client.get("%s?object_id=2&app_label=%s&model_name=%s" % (reverse("grp_related_lookup"), "grappelli", "entry"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=2&app_label=grappelli&model_name=entry'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "2", "label": "Entry Editor"}])
 
@@ -115,15 +139,24 @@ class RelatedTests(TestCase):
         # limits the entry to the logged in user (but we currently do not make use
         # of custom admin querysets)
         self.client.login(username="Editor001", password="editor001")
-        response = self.client.get("%s?object_id=1&app_label=%s&model_name=%s" % (reverse("grp_related_lookup"), "grappelli", "entry"))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=1&app_label=grappelli&model_name=entry'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Entry Superuser"}])
 
         # wrong app_label/model_name
-        response = self.client.get("%s?object_id=1&app_label=false&model_name=false" % (reverse("grp_related_lookup")))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=1&app_label=false&model_name=false'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": None, "label": ""}])
-        response = self.client.get("%s?object_id=&app_label=false&model_name=false" % (reverse("grp_related_lookup")))
+        response = self.client.get(
+            f'{reverse("grp_related_lookup")}?object_id=&app_label=false&model_name=false'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": None, "label": ""}])
 
@@ -141,42 +174,66 @@ class RelatedTests(TestCase):
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": None, "label": ""}])
 
         # ok (single)
-        response = self.client.get("%s?object_id=1&app_label=%s&model_name=%s" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=1&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Category No 0 (1)"}])
 
         # wrong object_id (single)
-        response = self.client.get("%s?object_id=10000&app_label=%s&model_name=%s" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=10000&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "10000", "label": "?"}])
 
         # ok (multiple)
-        response = self.client.get("%s?object_id=1,2,3&app_label=%s&model_name=%s" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=1,2,3&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Category No 0 (1)"}, {"value": "2", "label": "Category No 1 (2)"}, {"value": "3", "label": "Category No 2 (3)"}])
 
         # wrong object_id (multiple)
-        response = self.client.get("%s?object_id=1,10000,3&app_label=%s&model_name=%s" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=1,10000,3&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Category No 0 (1)"}, {"value": "10000", "label": "?"}, {"value": "3", "label": "Category No 2 (3)"}])
 
         # filtered queryset (single filter) fails
-        response = self.client.get("%s?object_id=1,2,3&app_label=%s&model_name=%s&query_string=id__gte=99" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=1,2,3&app_label=grappelli&model_name=category&query_string=id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "?"}, {"value": "2", "label": "?"}, {"value": "3", "label": "?"}])
 
         # filtered queryset (single filter) works
-        response = self.client.get("%s?object_id=1,2,3&app_label=%s&model_name=%s&query_string=id__lte=3" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=1,2,3&app_label=grappelli&model_name=category&query_string=id__lte=3'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Category No 0 (1)"}, {"value": "2", "label": "Category No 1 (2)"}, {"value": "3", "label": "Category No 2 (3)"}])
 
         # filtered queryset (multiple filters) fails
-        response = self.client.get("%s?object_id=1,2,3&app_label=%s&model_name=%s&query_string=name__icontains=99:id__gte=99" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=1,2,3&app_label=grappelli&model_name=category&query_string=name__icontains=99:id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "?"}, {"value": "2", "label": "?"}, {"value": "3", "label": "?"}])
 
         # filtered queryset (multiple filters) works
-        response = self.client.get("%s?object_id=1,2,3&app_label=%s&model_name=%s&query_string=name__icontains=Category:id__lte=3" % (reverse("grp_m2m_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_m2m_lookup")}?object_id=1,2,3&app_label=grappelli&model_name=category&query_string=name__icontains=Category:id__lte=3'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": "1", "label": "Category No 0 (1)"}, {"value": "2", "label": "Category No 1 (2)"}, {"value": "3", "label": "Category No 2 (3)"}])
 
@@ -194,21 +251,33 @@ class RelatedTests(TestCase):
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": None, "label": ""}])
 
         # term not found
-        response = self.client.get("%s?term=XXXXXXXXXX&app_label=%s&model_name=%s" % (reverse("grp_autocomplete_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_autocomplete_lookup")}?term=XXXXXXXXXX&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": None, "label": "0 results"}])
 
         # ok (99 finds the id and the title, therefore 2 results)
-        response = self.client.get("%s?term=Category No 99&app_label=%s&model_name=%s" % (reverse("grp_autocomplete_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_autocomplete_lookup")}?term=Category No 99&app_label=grappelli&model_name=category'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": 99, "label": "Category No 98 (99)"}, {"value": 100, "label": "Category No 99 (100)"}])
 
         # filtered queryset (single filter)
-        response = self.client.get("%s?term=Category&app_label=%s&model_name=%s&query_string=id__gte=99" % (reverse("grp_autocomplete_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_autocomplete_lookup")}?term=Category&app_label=grappelli&model_name=category&query_string=id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": 99, "label": "Category No 98 (99)"}, {"value": 100, "label": "Category No 99 (100)"}])
 
         # filtered queryset (multiple filters)
-        response = self.client.get("%s?term=Category&app_label=%s&model_name=%s&query_string=name__icontains=99:id__gte=99" % (reverse("grp_autocomplete_lookup"), "grappelli", "category"))
+        response = self.client.get(
+            f'{reverse("grp_autocomplete_lookup")}?term=Category&app_label=grappelli&model_name=category&query_string=name__icontains=99:id__gte=99'
+        )
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode('utf-8'), [{"value": 100, "label": "Category No 99 (100)"}])

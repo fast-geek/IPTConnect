@@ -41,10 +41,12 @@ class UploadToPathAndRename(object):
 		ext = filename.split('-')[-1]
 		# get filename
 		if instance.pk:
-			filename = iri_to_uri(replace((u'{}_{}_{}.{}').format(instance.team,instance.surname,instance.name, ext),' ','_'))
+			filename = iri_to_uri(
+			    replace(f'{instance.team}_{instance.surname}_{instance.name}.{ext}', ' ',
+			            '_'))
 		else:
 			# set filename as random string
-			filename = '{}.{}'.format(uuid4().hex, ext)
+			filename = f'{uuid4().hex}.{ext}'
 		# return the whole path to the file
 		return os.path.join(self.sub_path, filename)
 
@@ -109,7 +111,7 @@ class Participant(models.Model):
 		"""
 		:return: return the full name of the participant
 		"""
-		return self.name+' '+self.surname
+		return f'{self.name} {self.surname}'
 
 	def __unicode__(self):
 		"""
@@ -123,16 +125,19 @@ class Participant(models.Model):
 		rounds_as_opponent = Round.objects.filter(opponent=self)
 		rounds_as_reviewer = Round.objects.filter(reviewer=self)
 
-		self.tot_score_as_reporter = sum([round.score_reporter for round in rounds_as_reporter])
-		self.tot_score_as_opponent = sum([round.score_opponent for round in rounds_as_opponent])
-		self.tot_score_as_reviewer = sum([round.score_reviewer for round in rounds_as_reviewer])
+		self.tot_score_as_reporter = sum(
+		    round.score_reporter for round in rounds_as_reporter)
+		self.tot_score_as_opponent = sum(
+		    round.score_opponent for round in rounds_as_opponent)
+		self.tot_score_as_reviewer = sum(
+		    round.score_reviewer for round in rounds_as_reviewer)
 
 		self.mean_score_as_reporter = self.tot_score_as_reporter / max(len(rounds_as_reporter), 1)
 		self.mean_score_as_opponent = self.tot_score_as_opponent / max(len(rounds_as_opponent), 1)
 		self.mean_score_as_reviewer = self.tot_score_as_reviewer / max(len(rounds_as_reviewer), 1)
 
 		res = 0.0
-		res += sum([round.points_reporter for round in rounds_as_reporter])
+		res += sum(round.points_reporter for round in rounds_as_reporter)
 		res += self.tot_score_as_opponent * 2.0
 		res += self.tot_score_as_reviewer
 
@@ -338,14 +343,14 @@ class Team(models.Model):
 
 		res = 0.0
 
-		res += sum([round.points_reporter for round in rounds_as_reporter])
-		res += sum([round.points_opponent for round in rounds_as_opponent])
-		res += sum([round.points_reviewer for round in rounds_as_reviewer])
+		res += sum(round.points_reporter for round in rounds_as_reporter)
+		res += sum(round.points_opponent for round in rounds_as_opponent)
+		res += sum(round.points_reviewer for round in rounds_as_reviewer)
 
 		if include_bonus:
 			# Bonus points for winning the fight are stored in a round
 			# at which the appropriate team was the reporter
-			res += sum([round.bonus_points_reporter for round in rounds_as_reporter])
+			res += sum(round.bonus_points_reporter for round in rounds_as_reporter)
 
 		return (
 			res,
@@ -480,7 +485,7 @@ class Jury(models.Model):
 		"""
 		:return: return the full name of the jury member
 		"""
-		return self.name+' '+self.surname
+		return f'{self.name} {self.surname}'
 
 	def __unicode__(self):
 		return self.fullname()
@@ -540,10 +545,8 @@ class Round(models.Model):
 			#TODO: send a report to the admins!
 			fight_name = 'Unknown Fight (possibly an error!)'
 
-		return \
-			 fight_name +\
-			" | Round %i" % self.round_number +\
-			(" | Room " + self.room.name if self.pf_number <= params.npf else "")
+		return (fight_name + " | Round %i" % self.round_number +
+		        (f" | Room {self.room.name}" if self.pf_number <= params.npf else ""))
 
 	def save(self, *args, **kwargs):
 		jurygrades = JuryGrade.objects.filter(round=self)
@@ -574,7 +577,7 @@ class Round(models.Model):
 		super(Round, self).save(*args, **kwargs)
 
 	def ident(self):
-		return "%s%s%s" %(self.pf_number, self.round_number, self.room.ident())
+		return f"{self.pf_number}{self.round_number}{self.room.ident()}"
 
 	def can_add_next(self):
 		# We don't want to create the next Round, if...
@@ -584,7 +587,7 @@ class Round(models.Model):
 			return False
 
 		# ...current Round has no number
-		if self.round_number == None:
+		if self.round_number is None:
 			return False
 
 		roomrounds = Round.objects.filter(pf_number=self.pf_number,room=self.room)
@@ -622,13 +625,14 @@ class Round(models.Model):
 		next_round.reviewer_team = self.reporter_team
 
 		# 2-fights
-		if params.optional_reviewers and next_round.round_number == 2:
-			if   next_round.reviewer_team != None and next_round.reporter_team == None:
-				 next_round.reporter_team = next_round.reviewer_team
-				 next_round.reviewer_team = None
-			elif next_round.reviewer_team != None and next_round.opponent_team == None:
-				 next_round.opponent_team = next_round.reviewer_team
-				 next_round.reviewer_team = None
+		if (params.optional_reviewers and next_round.round_number == 2
+		    and next_round.reviewer_team != None):
+			if next_round.reporter_team is None:
+				next_round.reporter_team = next_round.reviewer_team
+				next_round.reviewer_team = None
+			elif next_round.opponent_team is None:
+				next_round.opponent_team = next_round.reviewer_team
+				next_round.reviewer_team = None
 
 		# Jurors! They are the same
 		jurygrades = JuryGrade.objects.filter(round=self)
@@ -684,7 +688,7 @@ class JuryGrade(models.Model):
 			)
 
 	def __unicode__(self):
-		return "Grade of %s" % self.jury.name
+		return f"Grade of {self.jury.name}"
 
 	def info(self):
 		print "=" * 36
@@ -701,7 +705,7 @@ class TacticalRejection(models.Model):
 	problem = models.ForeignKey(Problem)
 
 	def __unicode__(self):
-		return "Problem rejected : %s" % self.problem.pk
+		return f"Problem rejected : {self.problem.pk}"
 
 class EternalRejection(models.Model):
 
@@ -709,7 +713,7 @@ class EternalRejection(models.Model):
 	problem = models.ForeignKey(Problem)
 
 	def __unicode__(self):
-		return "Problem rejected : %s" % self.problem.pk
+		return f"Problem rejected : {self.problem.pk}"
 
 class AprioriRejection(models.Model):
 
@@ -718,7 +722,7 @@ class AprioriRejection(models.Model):
 
 	def __unicode__(self):
 		# TODO: also print the Team
-		return "Problem rejected : %s" % self.problem.pk
+		return f"Problem rejected : {self.problem.pk}"
 
 
 # method for updating Teams and Participants when rounds are saved
@@ -784,7 +788,6 @@ def update_bonus_points():
 
 	for round in rounds.filter(round_number=2):
 
-		bonuspts = {}
 		thispfrounds = Round.objects.filter(pf_number=round.pf_number).filter(room=round.room)
 		thispfteams = get_involved_teams_dict(thispfrounds)
 
@@ -797,14 +800,12 @@ def update_bonus_points():
 		if thispfrounds.count() != len(thispfteams):
 			continue
 
-		# set the bonus points to zero
-		for team in thispfteams:
-			bonuspts[team] = 0.0
-
-		points_dict = {}
-		for team in thispfteams:
-			points_dict[team] = team.get_scores_for_rounds(rounds=thispfrounds, include_bonus=False)
-
+		bonuspts = {team: 0.0 for team in thispfteams}
+		points_dict = {
+		    team: team.get_scores_for_rounds(
+		        rounds=thispfrounds, include_bonus=False)
+		    for team in thispfteams
+		}
 		# get teams sorted by total points for the physics fight
 		team_podium = sorted(thispfteams, key = lambda t : points_dict[t], reverse=True)
 		points_list = [points_dict[t] for t in team_podium]

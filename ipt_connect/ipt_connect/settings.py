@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
@@ -56,7 +57,10 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
 ) + INSTALLED_TOURNAMENTS
 
-MIGRATION_MODULES = dict([(app, app + '.migrations.' + app) for app in INSTALLED_TOURNAMENTS])
+MIGRATION_MODULES = dict(
+    [(app, f'{app}.migrations.{app}') for app in INSTALLED_TOURNAMENTS]
+)
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

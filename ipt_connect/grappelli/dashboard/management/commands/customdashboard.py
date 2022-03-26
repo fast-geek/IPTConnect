@@ -17,8 +17,7 @@ class Command(BaseCommand):
     label = 'application name'
 
     def handle(self, file=None, **options):
-        context = {}
-        context['project'] = os.path.basename(os.getcwd())
+        context = {'project': os.path.basename(os.getcwd())}
         tpl = ['dashboard/dashboard.txt', 'grappelli/dashboard/dashboard.txt']
         dst = file is not None and file or DEFAULT_FILE
         if os.path.exists(dst):

@@ -63,7 +63,7 @@ for indt, team in enumerate(teams):
 		gradscatters = []
 		grads = []
 		for v in vals:
-			for ind in np.arange(v[2]):
+			for _ in np.arange(v[2]):
 				gradscatters.append(v[1])
 				grads.append(v[0])
 
@@ -73,7 +73,7 @@ for indt, team in enumerate(teams):
 		elif np.mean(gradscatters) < 0:
 			color='crimson'
 		maxscatter=1.0
-		if len(grads) > 0 :
+		if grads:
 			ax.scatter(indt, indj, s=np.sum([v[2] for v in vals]*15), c=color, alpha=max(min(np.abs(np.mean(gradscatters))/maxscatter, 1), 0.4), linewidths=0.2)
 			team.jurys.append(jury) # jurys that have judged team
 
@@ -154,85 +154,6 @@ stds_rep = [jury.std_rep for jury in jurys if not math.isnan(jury.std_rep)]
 stds_opp = [jury.std_opp for jury in jurys if not math.isnan(jury.std_opp)]
 stds_rev = [jury.std_rev for jury in jurys if not math.isnan(jury.std_rev)]
 stds_all = [jury.std_all for jury in jurys if not math.isnan(jury.std_all)]
-
-
-if 0:
-	# medians
-	title = "jury members with at least 12 PFs"
-	plt.figure(figsize=(8, 10))
-	plt.subplot(4,1,1)
-	plt.hist(meds_rep, bins=20, color="sage", label='reporter')
-	plt.legend()
-	plt.ylabel("#", fontsize=14)
-	plt.title(title, fontsize =18)
-	plt.subplot(4,1,2)
-	plt.hist(meds_opp, bins=20, color="crimson", label='opponent')
-	plt.ylabel("#", fontsize=14)
-	plt.legend()
-	plt.subplot(4,1,3)
-	plt.hist(meds_rev, bins=20, color="gray", label='reviewer')
-	plt.ylabel("#", fontsize=14)
-	plt.legend()
-	plt.subplot(4,1,4)
-	plt.hist(meds_all, bins=20, color="royalblue", label='all grades')
-	plt.xlabel("Median of jury member grades", fontsize=14)
-	plt.ylabel("#", fontsize=14)
-	plt.legend()
-
-
-	# standard deviations
-	title = "jury members with at least 12 PFs"
-	plt.figure(figsize=(8, 10))
-	plt.subplot(4,1,1)
-	plt.hist(stds_rep, bins=20, color="sage", label='reporter')
-	plt.legend()
-	plt.ylabel("#", fontsize=14)
-	plt.title(title, fontsize =18)
-	plt.subplot(4,1,2)
-	plt.hist(stds_opp, bins=20, color="crimson", label='opponent')
-	plt.ylabel("#", fontsize=14)
-	plt.legend()
-	plt.subplot(4,1,3)
-	plt.hist(stds_rev, bins=20, color="gray", label='reviewer')
-	plt.ylabel("#", fontsize=14)
-	plt.legend()
-	plt.subplot(4,1,4)
-	plt.hist(stds_all, bins=20, color="royalblue", label='all grades')
-	plt.xlabel("Standard deviation of jury member grades ", fontsize=14)
-	plt.ylabel("#", fontsize=14)
-	plt.legend()
-
-	# meds vs std
-	title = "jury members with at least 12 PFs"
-	plt.figure(figsize=(8, 10))
-	plt.subplot(4,1,1)
-	plt.scatter(meds_rep, stds_rep, s=60, color="sage", label='reporter')
-	plt.legend()
-	plt.ylabel("Std", fontsize=14)
-	plt.title(title, fontsize =18)
-	plt.subplot(4,1,2)
-	plt.scatter(meds_opp, stds_opp, s=60, color="crimson", label='opponent')
-	plt.ylabel("Std", fontsize=14)
-	plt.legend()
-	plt.subplot(4,1,3)
-	plt.scatter(meds_rev, stds_rev, s=60, color="grey", label='reviewer')
-	plt.ylabel("Std", fontsize=14)
-	plt.legend()
-	plt.subplot(4,1,4)
-	plt.scatter(meds_all, stds_all, s=60, color="royalblue", label='all grades')
-	plt.xlabel("Median of jury member grades", fontsize=14)
-	plt.ylabel("Std", fontsize=14)
-	plt.legend()
-
-
-
-
-
-
-
-
-
-
 
 
 plt.show()

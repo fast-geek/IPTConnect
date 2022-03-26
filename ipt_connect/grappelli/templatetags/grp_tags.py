@@ -32,9 +32,11 @@ class do_get_generic_objects(template.Node):
         pass
 
     def render(self, context):
-        objects = {}
-        for c in ContentType.objects.all().order_by('id'):
-            objects[c.id] = {'pk': c.id, 'app': c.app_label, 'model': c.model}
+        objects = {
+            c.id: {'pk': c.id, 'app': c.app_label, 'model': c.model}
+            for c in ContentType.objects.all().order_by('id')
+        }
+
         return json.dumps(objects)
 
 
@@ -109,9 +111,7 @@ def grappelli_clean_input_types():
 def classname(obj, arg=None):
     classname = obj.__class__.__name__.lower()
     if arg:
-        if arg.lower() == classname:
-            return True
-        return False
+        return arg.lower() == classname
     return classname
 
 
@@ -119,7 +119,7 @@ def classname(obj, arg=None):
 def classpath(obj):
     module = obj.__module__
     classname = obj.__class__.__name__
-    return "%s,%s" % (module, classname)
+    return f"{module},{classname}"
 
 
 # FORMSETSORT FOR SORTABLE INLINES

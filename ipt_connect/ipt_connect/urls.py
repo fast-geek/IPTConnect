@@ -6,8 +6,7 @@ from ipt_connect.views import home
 
 import importlib
 tournament_overview = importlib.import_module(
-	settings.INSTALLED_TOURNAMENTS[0]+'.views'
-).tournament_overview
+    f'{settings.INSTALLED_TOURNAMENTS[0]}.views').tournament_overview
 
 
 urlpatterns = [
@@ -22,10 +21,7 @@ urlpatterns = [
     url(r'^admin/', include('loginas.urls')),
 ]
 
-for tournament in settings.INSTALLED_TOURNAMENTS:
-	urlpatterns.append(
-		url(r'^' + tournament + '/', include(tournament + '.urls', namespace=tournament)),
-	)
-
-
+urlpatterns.extend(
+    url(f'^{tournament}/', include(f'{tournament}.urls', namespace=tournament))
+    for tournament in settings.INSTALLED_TOURNAMENTS)
 admin.site.site_header = 'IPT administration'

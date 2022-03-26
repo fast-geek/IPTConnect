@@ -10,7 +10,7 @@ class Registry(object):
     def register(cls, klass, app_name):
         from grappelli.dashboard.dashboards import Dashboard
         if not issubclass(klass, Dashboard):
-            raise ValueError('%s is not an instance of Dashboard' % klass)
+            raise ValueError(f'{klass} is not an instance of Dashboard')
         if app_name in cls.registry:
             raise ValueError('A dashboard has already been registered for '
                              'the application "%s"', app_name)
@@ -56,4 +56,4 @@ def autodiscover(blacklist=[]):
             continue
 
         # looks like we found it so import it !
-        import_module('%s.dashboard' % app)
+        import_module(f'{app}.dashboard')

@@ -130,16 +130,21 @@ class DefaultIndexDashboard(Dashboard):
     def init_with_context(self, context):
         site_name = get_admin_site_name(context)
         # append a link list module for "quick links"
-        self.children.append(modules.LinkList(
-            _('Quick links'),
-            collapsible=False,
-            children=[
-                [_('Return to site'), '/'],
-                [_('Change password'),
-                 reverse('%s:password_change' % site_name)],
-                [_('Log out'), reverse('%s:logout' % site_name)],
-            ]
-        ))
+        self.children.append(
+            modules.LinkList(
+                _('Quick links'),
+                collapsible=False,
+                children=[
+                    [_('Return to site'), '/'],
+                    [
+                        _('Change password'),
+                        reverse(f'{site_name}:password_change'),
+                    ],
+                    [_('Log out'), reverse(f'{site_name}:logout')],
+                ],
+            )
+        )
+
 
         # append an app list module for "Applications"
         self.children.append(modules.AppList(
