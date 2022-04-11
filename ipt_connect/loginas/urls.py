@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from ipt_connect.loginas.views import user_login, user_logout
+from .views import user_login, user_logout
 
 urlpatterns = [
     url(r"^login/user/(?P<user_id>.+)/$", user_login, name="loginas-user-login"),

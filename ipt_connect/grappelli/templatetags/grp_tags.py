@@ -5,7 +5,7 @@ import json
 from functools import wraps
 
 # grappelli imports
-from ipt_connect.grappelli.settings import *
+from ..settings import *
 
 try:
     from django.contrib.auth import get_user_model
