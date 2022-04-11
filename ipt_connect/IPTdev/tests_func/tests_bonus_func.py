@@ -1,7 +1,9 @@
 from django.test import TestCase
+
 from ..func_bonus import *
 
-class  Test(TestCase):
+
+class Test(TestCase):
 
     def test_distribute_bonus(self):
         input_data = [

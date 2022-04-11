@@ -4,11 +4,10 @@
 Module where grappelli dashboard modules classes are defined.
 """
 
+from django.apps import apps as django_apps
 # DJANGO IMPORTS
 from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy as _
-from django.apps import apps as django_apps
-
 # GRAPPELLI IMPORTS
 from grappelli.dashboard.utils import AppListElementMixin
 

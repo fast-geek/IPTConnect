@@ -6,15 +6,16 @@
 # DJANGO IMPORTS
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import load_backend, login
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.admin.views.decorators import staff_member_required
 
 try:
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
@@ -25,10 +26,10 @@ from grappelli.settings import SWITCH_USER_ORIGINAL, SWITCH_USER_TARGET
 
 @staff_member_required
 def switch_user(request, object_id):
-
     # current/session user
     current_user = request.user
-    session_user = request.session.get("original_user", {"id": current_user.id, "username": current_user.get_username()})
+    session_user = request.session.get("original_user",
+                                       {"id": current_user.id, "username": current_user.get_username()})
 
     # check original_user
     try:
@@ -37,7 +38,8 @@ def switch_user(request, object_id):
             messages.add_message(request, messages.ERROR, _("Permission denied."))
             return redirect(request.GET.get("redirect"))
     except ObjectDoesNotExist:
-        msg = _('%(name)s object with primary key %(key)r does not exist.') % {'name': "User", 'key': escape(session_user["id"])}
+        msg = _('%(name)s object with primary key %(key)r does not exist.') % {'name': "User",
+                                                                               'key': escape(session_user["id"])}
         messages.add_message(request, messages.ERROR, msg)
         return redirect(request.GET.get("redirect"))
 

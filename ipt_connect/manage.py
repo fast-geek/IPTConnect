@@ -2,6 +2,7 @@
 import os
 import sys
 
+
 def is_po_updated(path):
     for root, _, files in os.walk(path):
         if len(files) == 1:
@@ -14,6 +15,7 @@ def is_po_updated(path):
         if po > mo:
             return 1
     return 0
+
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ipt_connect.settings")

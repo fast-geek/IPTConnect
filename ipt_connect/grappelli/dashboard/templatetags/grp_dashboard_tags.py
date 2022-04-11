@@ -45,6 +45,8 @@ def grp_render_dashboard(context, location='index', dashboard=None):
         'admin_url': reverse('%s:index' % get_admin_site_name(context)),
     })
     return context
+
+
 grp_render_dashboard = tag_func(grp_render_dashboard)
 
 
@@ -64,4 +66,6 @@ def grp_render_dashboard_module(context, module, index=None, subindex=None):
         'admin_url': reverse('%s:index' % get_admin_site_name(context)),
     })
     return context
+
+
 grp_render_dashboard_module = tag_func(grp_render_dashboard_module)

@@ -19,12 +19,11 @@ from django.contrib.messages.storage.cookie import CookieStorage
 from django.utils.six import text_type
 from django.utils import timezone
 
-
 from loginas import settings as la_settings
-
 
 try:
     import imp
+
     reload = imp.reload  # @ReservedAssignment
 except ImportError:
     pass
@@ -60,7 +59,6 @@ def login_as_nonstaff(request, user):
 
 
 class ViewTest(TestCase):
-
     """Tests for user_login view"""
 
     def setUp(self):
@@ -179,6 +177,7 @@ class ViewTest(TestCase):
                 ImproperlyConfigured(message),
                 self.get_target_url
             )
+
         with override_settings(CAN_LOGIN_AS='loginas.tests.invalid_func'):
             assertMessage(
                 "Module loginas.tests does not define a invalid_func function.")

@@ -1,11 +1,12 @@
 # coding: utf-8
 
+import json
 # python imports
 from functools import wraps
-import json
 
 try:
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
@@ -21,7 +22,8 @@ from django.template.context import Context
 from django.utils.translation import ugettext as _
 
 # grappelli imports
-from grappelli.settings import ADMIN_TITLE, ADMIN_URL, SWITCH_USER, SWITCH_USER_ORIGINAL, SWITCH_USER_TARGET, CLEAN_INPUT_TYPES
+from grappelli.settings import ADMIN_TITLE, ADMIN_URL, SWITCH_USER, SWITCH_USER_ORIGINAL, SWITCH_USER_TARGET, \
+    CLEAN_INPUT_TYPES
 
 register = template.Library()
 
@@ -154,12 +156,14 @@ def safe_json_else_list_tag(f):
     Try: Return value of the decorated function marked safe and json encoded.
     Except: Return []
     """
+
     @wraps(f)
     def inner(model_admin):
         try:
             return mark_safe(json.dumps(f(model_admin)))
         except:
             return []
+
     return register.simple_tag(inner)
 
 
@@ -226,13 +230,15 @@ def switch_user_dropdown(context):
     if SWITCH_USER:
         tpl = get_template("admin/includes_grappelli/switch_user_dropdown.html")
         request = context["request"]
-        session_user = request.session.get("original_user", {"id": request.user.id, "username": request.user.get_username()})
+        session_user = request.session.get("original_user",
+                                           {"id": request.user.id, "username": request.user.get_username()})
         try:
             original_user = User.objects.get(pk=session_user["id"], is_staff=True)
         except User.DoesNotExist:
             return ""
         if SWITCH_USER_ORIGINAL(original_user):
-            object_list = [user for user in User.objects.filter(is_staff=True).exclude(pk=original_user.pk) if SWITCH_USER_TARGET(original_user, user)]
+            object_list = [user for user in User.objects.filter(is_staff=True).exclude(pk=original_user.pk) if
+                           SWITCH_USER_TARGET(original_user, user)]
             return tpl.render({
                 'request': request,
                 'object_list': object_list

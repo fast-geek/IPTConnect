@@ -15,6 +15,7 @@ class Registry(object):
             raise ValueError('A dashboard has already been registered for '
                              'the application "%s"', app_name)
         cls.registry[app_name] = klass
+
     register = classmethod(register)
 
 

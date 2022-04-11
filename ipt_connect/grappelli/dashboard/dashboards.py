@@ -4,12 +4,11 @@
 Module where grappelli dashboard classes are defined.
 """
 
+from django import forms
+from django.core.urlresolvers import reverse
 # DJANGO IMPORTS
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
-from django import forms
-
 # GRAPPELLI IMPORTS
 from grappelli.dashboard import modules
 from grappelli.dashboard.utils import get_admin_site_name

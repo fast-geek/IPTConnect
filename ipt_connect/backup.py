@@ -8,7 +8,6 @@ import shutil
 
 
 class Backup(object):
-
     now = datetime.datetime.now()
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     BACKUPS_DIR = os.path.join(CURRENT_DIR, 'backups', str(now.year), str(now.month))
@@ -19,7 +18,8 @@ class Backup(object):
             os.makedirs(Backup.BACKUPS_DIR)
         except OSError:
             pass
-        logging.basicConfig(filename=Backup.LOG_FILE, level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S -')
+        logging.basicConfig(filename=Backup.LOG_FILE, level=logging.INFO, format='%(asctime)s %(message)s',
+                            datefmt='%Y/%m/%d %H:%M:%S -')
         self.db_path = os.path.join(Backup.CURRENT_DIR, 'db.sqlite3')
         self.db_file = open(self.db_path, 'rb')
         if self.is_db_changed():
@@ -64,6 +64,7 @@ class Backup(object):
             logging.info("Something wrong, file wasn't copied!")
             return
         logging.info('File was successfully copied.')
+
 
 if __name__ == '__main__':
     b = Backup()

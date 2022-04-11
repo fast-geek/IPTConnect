@@ -2,12 +2,12 @@
 
 # DJANGO IMPORTS
 from django.conf.urls import url
-# from django.views.generic import TemplateView
 
 # GRAPPELLI IMPORTS
 from .views.related import RelatedLookup, M2MLookup, AutocompleteLookup
 from .views.switch import switch_user
 
+# from django.views.generic import TemplateView
 
 urlpatterns = [
 

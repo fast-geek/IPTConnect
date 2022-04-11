@@ -1,12 +1,12 @@
 import logging
+from datetime import timedelta
 
 from django.conf import settings as django_settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model, load_backend, login, logout
 from django.contrib.auth.models import update_last_login
 from django.contrib.auth.signals import user_logged_in
-from django.contrib import messages
 from django.core.signing import TimestampSigner, SignatureExpired
-from datetime import timedelta
 
 from . import settings as la_settings
 

@@ -1,17 +1,16 @@
 # coding: utf-8
 
-# DJANGO IMPORTS
-from django.test import TestCase
-from django.test.utils import override_settings
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
+# DJANGO IMPORTS
+from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
-
+from grappelli.templatetags.grp_tags import switch_user_dropdown
 # GRAPPELLI IMPORTS
 from grappelli.tests.models import Category
-from grappelli.templatetags.grp_tags import switch_user_dropdown
 
 
 @override_settings(GRAPPELLI_SWITCH_USER=True)
@@ -98,7 +97,8 @@ class SwitchTests(TestCase):
         target_user = User.objects.get(username="Superuser002")
 
         self.client.login(username="Superuser001", password="superuser001")
-        response = self.client.get("%s?redirect=%s" % (reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
+        response = self.client.get("%s?redirect=%s" % (
+        reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual([m.message for m in list(response.context['messages'])], [_("Permission denied.")])
         self.assertEqual(self.client.session.get("original_user", None), None)
@@ -114,9 +114,11 @@ class SwitchTests(TestCase):
         target_user = User.objects.get(username="Editor001")
 
         self.client.login(username="Superuser001", password="superuser001")
-        response = self.client.get("%s?redirect=%s" % (reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
+        response = self.client.get("%s?redirect=%s" % (
+        reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(self.client.session.get("original_user", None), {"id": original_user.id, "username": original_user.username})
+        self.assertEqual(self.client.session.get("original_user", None),
+                         {"id": original_user.id, "username": original_user.username})
         self.assertEqual(int(self.client.session['_auth_user_id']), target_user.pk)
 
         # templatetag (Superuser001, Editor001, Editor002)
@@ -126,7 +128,9 @@ class SwitchTests(TestCase):
         self.assertEqual(t, t_cmp)
 
         # switch back to superuser
-        response = self.client.get("%s?redirect=%s" % (reverse("grp_switch_user", args=[original_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
+        response = self.client.get("%s?redirect=%s" % (
+        reverse("grp_switch_user", args=[original_user.id]), reverse("admin:grappelli_category_changelist")),
+                                   follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.client.session.get("original_user", None), None)
         self.assertEqual(int(self.client.session['_auth_user_id']), original_user.pk)
@@ -141,9 +145,12 @@ class SwitchTests(TestCase):
         target_user = User.objects.get(username="User001")
 
         self.client.login(username="Superuser001", password="superuser001")
-        response = self.client.get("%s?redirect=%s" % (reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
+        response = self.client.get("%s?redirect=%s" % (
+        reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual([m.message for m in list(response.context['messages'])], [_('%(name)s object with primary key %(key)r does not exist.') % {'name': "User", 'key': escape(target_user.id)}])
+        self.assertEqual([m.message for m in list(response.context['messages'])], [
+            _('%(name)s object with primary key %(key)r does not exist.') % {'name': "User",
+                                                                             'key': escape(target_user.id)}])
         self.assertEqual(self.client.session.get("original_user", None), None)
         self.assertEqual(int(self.client.session['_auth_user_id']), original_user.pk)
 
@@ -157,7 +164,8 @@ class SwitchTests(TestCase):
         target_user = User.objects.get(username="User001")
 
         self.client.login(username="Editor001", password="editor001")
-        response = self.client.get("%s?redirect=%s" % (reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
+        response = self.client.get("%s?redirect=%s" % (
+        reverse("grp_switch_user", args=[target_user.id]), reverse("admin:grappelli_category_changelist")), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual([m.message for m in list(response.context['messages'])], [_("Permission denied.")])
         self.assertEqual(self.client.session.get("original_user", None), None)

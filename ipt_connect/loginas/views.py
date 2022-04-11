@@ -7,16 +7,16 @@ from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect
 from django.utils import six
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
-from django.utils.translation import ugettext_lazy as _
 
-from .utils import login_as, restore_original_login
 from . import settings as la_settings
-
+from .utils import login_as, restore_original_login
 
 try:
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
