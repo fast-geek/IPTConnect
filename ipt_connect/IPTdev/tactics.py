@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
-from models import *
+from .models import *
 from django.contrib.auth.decorators import user_passes_test
-import parameters as params
-from views import *
+from . import parameters as params
+from .views import *
 
 def build_tactics_for_two_teams(reporter_team, opponent_team, current_round=None):
 	# A "challenge simulation" function.
@@ -55,15 +55,15 @@ def build_tactics_for_two_teams(reporter_team, opponent_team, current_round=None
 					# TODO: is it possible to cast a lambda here?
 				),
 			'apriori_rejected_by_reporter':
-				map(
+				list(map(
 					lambda rejection: None,
 					list(apri_rej.filter(team=reporter_team)),
-				),
+				)),
 			'eternally_rejected_by_reporter':
-				map(
+				list(map(
 					lambda rejection: rejection.round,
 					list(eter_rej.filter(round__reporter_team=reporter_team)),
-				),
+				)),
 			'reported_by_reporter':
 				list(atrounds.filter(reporter_team=reporter_team)),
 			'opposed_by_opponent':
@@ -77,12 +77,12 @@ def build_tactics_for_two_teams(reporter_team, opponent_team, current_round=None
 			# it is likely that the opponent will try to challenge for the same problem again.
 			# This knowledge is obviously valuable for the reporter ;-)
 			'tried_by_opponent':
-				map(
+				list(map(
 					lambda rejection: rejection.round,
 					list(tact_rej.filter(round__opponent_team=opponent_team))
 					+
 					list(eter_rej.filter(round__opponent_team=opponent_team)),
-				),
+				)),
 
 			# The same thing for reviewing
 			'reviewed_by_opponent':
@@ -98,12 +98,12 @@ def build_tactics_for_two_teams(reporter_team, opponent_team, current_round=None
 
 			# Crazyness must go on!
 			'tried_by_reporter':
-				map(
+				list(map(
 					lambda rejection: rejection.round,
 					list(tact_rej.filter(round__opponent_team=reporter_team))
 					+
 					list(eter_rej.filter(round__opponent_team=reporter_team)),
-				),
+				)),
 		}
 
 		for round in previous_rounds:
@@ -216,7 +216,7 @@ class TacticsForm(forms.Form):
 	try:
 		# This fails if no teams are registered (which is essentially for a new tournament)
 		all_teams = Team.objects.all()
-		team_choices = map(lambda team : (team.pk, team), all_teams)
+		team_choices = [(team.pk, team) for team in all_teams]
 		reporter_team = forms.ChoiceField(label='Reporter team', choices=team_choices)
 		opponent_team = forms.ChoiceField(label='Opponent team', choices=team_choices)
 	except:

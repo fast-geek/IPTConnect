@@ -1,10 +1,10 @@
 # coding: utf8
 
-import models as ipt_connect_models
+from . import models as ipt_connect_models
 
 from django.db import models
 
-import parameters as params
+from . import parameters as params
 
 
 

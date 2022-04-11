@@ -1,12 +1,12 @@
 # coding: utf8
 from django.contrib import admin
 from django.contrib.auth.models import User
-from models import *
-from model_SupplementaryMaterial import *
+from .models import *
+from .model_SupplementaryMaterial import *
 
 from django import forms
 from django.forms import widgets
-import parameters as params
+from . import parameters as params
 
 from solo.admin import SingletonModelAdmin
 #from config.models import SiteConfiguration
