@@ -5,16 +5,16 @@ from datetime import timedelta
 from urllib.parse import urlsplit
 
 from django.conf import settings as django_settings
-from django.test import Client
-from django.test import TestCase
 from django.contrib.auth.models import User, update_last_login
 from django.contrib.auth.signals import user_logged_in
-from django.test.utils import override_settings as override_settings_orig
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.messages.storage.cookie import CookieStorage
-from django.utils.six import text_type
+from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
+from django.test import Client
+from django.test import TestCase
+from django.test.utils import override_settings as override_settings_orig
 from django.utils import timezone
+from django.utils.six import text_type
 
 from .. import settings as la_settings
 

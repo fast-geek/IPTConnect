@@ -7,7 +7,6 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.utils.translation import get_language
 
-from . import parameters as params
 from .cache_per_user import cache_per_user as cache_page
 from .forms import UploadForm
 from .model_SupplementaryMaterial import SupplementaryMaterial
@@ -15,9 +14,8 @@ from .models import *
 
 
 def home(request):
-    text = """<h1>""" + params.NAME.full + """</h1>
-
-			  <p>Starting soon !</p>"""
+    text = f"""<h1>{params.NAME.full}""" + """</h1>
+			   <p>Starting soon !</p>"""
 
     return HttpResponse(text)
 
@@ -32,13 +30,7 @@ def ninja_test(user):
 
 @cache_page(cache_duration_short)
 def soon(request):
-    return render(
-        request,
-        '%s/bebacksoon.html' % params.instance_name,
-        {
-            'params': params,
-        }
-    )
+    return render(request, f'{params.instance_name}/bebacksoon.html', {'params': params, })
 
 
 #####################################################
@@ -47,41 +39,23 @@ def soon(request):
 def participants_trombinoscope(request):
     participants = Participant.objects.all().order_by('team', 'surname')
 
-    return render(
-        request,
-        '%s/participants_trombinoscope.html' % params.instance_name,
-        {
-            'participants': participants,
-        }
-    )
+    return render(request, f'{params.instance_name}/participants_trombinoscope.html', {'participants': participants, })
 
 
 @user_passes_test(lambda u: u.is_superuser or u.username == 'magnusson')
 def participants_export(request):
     participants = Participant.objects.all().order_by('team', 'role', 'name')
 
-    return render(
-        request,
-        '%s/participants_export.html' % params.instance_name,
-        {
-            'participants': participants,
-            'params': params,
-        }
-    )
+    return render(request, f'{params.instance_name}/participants_export.html',
+                  {'participants': participants, 'params': params, })
 
 
 @user_passes_test(lambda u: u.is_superuser)
 def participants_export_web(request):
     participants = Participant.objects.exclude(role='ACC').order_by('team', 'role', 'surname')
 
-    return render(
-        request,
-        '%s/listing_participants_web.html' % params.instance_name,
-        {
-            'participants': participants,
-            'params': params,
-        }
-    )
+    return render(request, f'{params.instance_name}/listing_participants_web.html',
+                  {'participants': participants, 'params': params, })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -98,10 +72,7 @@ def export_csv_ranking_timeline(request):
     allteams = list(Team.objects.all())
     writer.writerow([' '] + allteams)
 
-    previous_scores = {}
-    for team in allteams:
-        previous_scores[team] = 0
-
+    previous_scores = {team: 0 for team in allteams}
     for pf_number in selective_fights_and_semifinals:
         fight_rounds = Round.objects.filter(pf_number=pf_number)
         for round_number in range(1, params.max_rounds_in_pf + 1):
@@ -109,19 +80,15 @@ def export_csv_ranking_timeline(request):
             for team in allteams:
                 previous_scores[team] += team.get_scores_for_rounds(rounds=current_rounds, include_bonus=False)[0]
 
-            writer.writerow(
-                ['%s | Round %s' % (params.fights['names'][pf_number - 1], round_number)] +
-                [previous_scores[team] for team in allteams]
-            )
+            writer.writerow(([f"{params.fights['names'][pf_number - 1]} | Round {round_number}"] + [
+                previous_scores[team] for team in allteams]))
 
         for team in allteams:
             previous_scores[team] += \
                 team.get_scores_for_rounds(rounds=fight_rounds, include_bonus=True)[0] - \
                 team.get_scores_for_rounds(rounds=fight_rounds, include_bonus=False)[0]
         writer.writerow(
-            ['%s | Bonuses' % params.fights['names'][pf_number - 1]] +
-            [previous_scores[team] for team in allteams]
-        )
+            ([f"{params.fights['names'][pf_number - 1]} | Bonuses"] + [previous_scores[team] for team in allteams]))
 
     return response
 
@@ -130,29 +97,17 @@ def export_csv_ranking_timeline(request):
 def jury_export(request):
     jurys = Jury.objects.all().order_by('surname')
 
-    return render(
-        request,
-        '%s/listing_jurys.html' % params.instance_name,
-        {
-            'jurys': jurys,
-        }
-    )
+    return render(request, f'{params.instance_name}/listing_jurys.html', {'jurys': jurys, })
 
 
 @user_passes_test(lambda u: u.is_superuser)
 def jury_export_web(request):
     jurys = Jury.objects.filter(team=None).order_by('surname')
 
-    return render(
-        request,
-        '%s/listing_jurys_web.html' % params.instance_name,
-        {
-            'jurys': jurys,
-        }
-    )
+    return render(request, f'{params.instance_name}/listing_jurys_web.html', {'jurys': jurys, })
 
 
-@user_passes_test(lambda u: u.has_perm(params.instance_name + '.update_all'))
+@user_passes_test(lambda u: u.has_perm(f'{params.instance_name}.update_all'))
 def update_all(request):
     list_receivers = update_signal.send(sender=Round)
 
@@ -161,12 +116,12 @@ def update_all(request):
     return HttpResponse(list_receivers[0][1])
 
 
-@user_passes_test(lambda u: u.has_perm(params.instance_name + '.add_round'))
+@user_passes_test(lambda u: u.has_perm(f'{params.instance_name}.add_round'))
 def round_add_next(request, pk):
     try:
         current_round = Round.objects.get(pk=pk)
-    except ObjectDoesNotExist:
-        raise Http404()
+    except ObjectDoesNotExist as e:
+        raise Http404() from e
 
     if not current_round.can_add_next():
         raise Http404()
@@ -178,7 +133,7 @@ def round_add_next(request, pk):
     return round_detail(request, next_round.pk)
 
 
-@user_passes_test(lambda u: u.has_perm(params.instance_name + '.update_all'))
+@user_passes_test(lambda u: u.has_perm(f'{params.instance_name}.update_all'))
 def verify_all(request):
     all_rounds = Round.objects.all()
     checks_successful = []
@@ -200,91 +155,47 @@ def verify_all(request):
         if r.reporter_2 and r.reporter_2.team != r.reporter_team:
             rounds_with_reporter_2_team_mismatch.append(r)
 
-    simple_checks_for_rounds = [
-        (
-            all_rounds.filter(pf_number__gt=npf_tot),
-            'Some Rounds have unexpected Fight number',
-            'Each Round has a sane Fight number',
-            checks_with_errors,
-        ),
-        (
-            all_rounds.filter(problem_presented=None),
-            'Some Rounds have no Problem presented',
-            'Each Round has a presented Problem',
-            checks_with_errors,
-        ),
-        (
-            all_rounds.filter(reporter=None).exclude(reporter_2=None),
-            'Some Rounds have no Reporter specified but a Coreporter specified',
-            'If a Round has a Coreporter, it has a Reporter',
-            checks_with_errors,
-        ),
-        (
-            all_rounds.filter(reporter=None),
-            'Some Rounds have no Reporter specified',
-            'Each Round has a Reporter',
-            checks_with_errors,
-        ),
-        (
-            all_rounds.filter(opponent=None),
-            'Some Rounds have no Opponent specified',
-            'Each Round has an Opponent',
-            checks_with_errors,
-        ),
-        (
-            all_rounds.filter(reviewer=None),
-            'Some Rounds have no Reviewer specified',
-            'Each Round has a Reviewer',
-            checks_with_errors if not params.optional_reviewers else checks_with_warnings,
-        ),
-        (
-            all_rounds.filter(reporter_team=None),
-            'Some Rounds have no Reporter Team specified',
-            'Each Round has a Reporter Team',
-            checks_with_errors,
-        ),
-        (
-            all_rounds.filter(opponent_team=None),
-            'Some Rounds have no Opponent Team specified',
-            'Each Round has an Opponent Team',
-            checks_with_errors,
-        ),
-        (
-            all_rounds.filter(reviewer_team=None),
-            'Some Rounds have no Reviewer Team specified',
-            'Each Round has an Reviewer Team',
-            checks_with_errors if not params.optional_reviewers else checks_with_warnings,
-        ),
-        (
-            rounds_with_reporter_team_mismatch,
-            'Some Rounds have a Reporter that is not a member of Reporter Team',
-            'For each Round a Reporter (if any) is a member of Reporter Team',
-            checks_with_errors,
-        ),
-        (
-            rounds_with_opponent_team_mismatch,
-            'Some Rounds have an Opponent that is not a member of Opponent Team',
-            'For each Round an Opponent (if any) is a member of Opponent Team',
-            checks_with_errors,
-        ),
-        (
-            rounds_with_reviewer_team_mismatch,
-            'Some Rounds have a Reviewer that is not a member of Reviewer Team',
-            'For each Round a Reviewer (if any) is a member of Reviewer Team',
-            checks_with_errors,
-        ),
-        (
-            rounds_with_reporter_2_team_mismatch,
-            'Some Rounds have a Coreporter that is not a member of Reporter Team',
-            'For each Round a Coreporter (if any) is a member of Reporter Team',
-            checks_with_errors,
-        ),
-    ]
+    simple_checks_for_rounds = [(all_rounds.filter(pf_number__gt=npf_tot), 'Some Rounds have unexpected Fight number',
+                                 'Each Round has a sane Fight number', checks_with_errors,), (
+                                    all_rounds.filter(problem_presented=None), 'Some Rounds have no Problem presented',
+                                    'Each Round has a presented Problem', checks_with_errors,), (
+                                    all_rounds.filter(reporter=None).exclude(reporter_2=None),
+                                    'Some Rounds have no Reporter specified but a Coreporter specified',
+                                    'If a Round has a Coreporter, it has a Reporter', checks_with_errors,), (
+                                    all_rounds.filter(reporter=None), 'Some Rounds have no Reporter specified',
+                                    'Each Round has a Reporter', checks_with_errors,), (
+                                    all_rounds.filter(opponent=None), 'Some Rounds have no Opponent specified',
+                                    'Each Round has an Opponent', checks_with_errors,), (
+                                    all_rounds.filter(reviewer=None), 'Some Rounds have no Reviewer specified',
+                                    'Each Round has a Reviewer',
+                                    checks_with_warnings if params.optional_reviewers else checks_with_errors), (
+                                    all_rounds.filter(reporter_team=None),
+                                    'Some Rounds have no Reporter Team specified',
+                                    'Each Round has a Reporter Team', checks_with_errors,), (
+                                    all_rounds.filter(opponent_team=None),
+                                    'Some Rounds have no Opponent Team specified',
+                                    'Each Round has an Opponent Team', checks_with_errors,), (
+                                    all_rounds.filter(reviewer_team=None),
+                                    'Some Rounds have no Reviewer Team specified',
+                                    'Each Round has an Reviewer Team',
+                                    checks_with_warnings if params.optional_reviewers else checks_with_errors), (
+                                    rounds_with_reporter_team_mismatch,
+                                    'Some Rounds have a Reporter that is not a member of Reporter Team',
+                                    'For each Round a Reporter (if any) is a member of Reporter Team',
+                                    checks_with_errors,),
+                                (rounds_with_opponent_team_mismatch,
+                                 'Some Rounds have an Opponent that is not a member of Opponent Team',
+                                 'For each Round an Opponent (if any) is a member of Opponent Team',
+                                 checks_with_errors,), (rounds_with_reviewer_team_mismatch,
+                                                        'Some Rounds have a Reviewer that is not a member of Reviewer Team',
+                                                        'For each Round a Reviewer (if any) is a member of Reviewer Team',
+                                                        checks_with_errors,), (rounds_with_reporter_2_team_mismatch,
+                                                                               'Some Rounds have a Coreporter that is not a member of Reporter Team',
+                                                                               'For each Round a Coreporter (if any) is a member of Reporter Team',
+                                                                               checks_with_errors,)]
 
     for check in simple_checks_for_rounds:
-        rounds_with_the_issue = check[0]
-
-        if rounds_with_the_issue:
+        if rounds_with_the_issue := check[0]:
             check[3].append((
                 check[1],
                 list(rounds_with_the_issue),
@@ -292,16 +203,9 @@ def verify_all(request):
         else:
             checks_successful.append(check[2])
 
-    return render(
-        request,
-        '%s/verify_all.html' % params.instance_name,
-        {
-            'params': params,
-            'checks_successful': checks_successful,
-            'checks_with_warnings': checks_with_warnings,
-            'checks_with_errors': checks_with_errors,
-        }
-    )
+    return render(request, f'{params.instance_name}/verify_all.html',
+                  {'params': params, 'checks_successful': checks_successful,
+                   'checks_with_warnings': checks_with_warnings, 'checks_with_errors': checks_with_errors, })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -777,7 +681,7 @@ def round_detail(request, pk):
             'unavailable_problems': make_old_fashioned_list_from_tactics_data(round),
             'display_room_name': round.pf_number <= params.npf,
             'display_rejections': params.fights['challenge_procedure'][round.pf_number - 1] and (
-                        params.enable_tactical_rejections or params.enable_eternal_rejections),
+                    params.enable_tactical_rejections or params.enable_eternal_rejections),
             'display_problems_forbidden': params.fights['problems_forbidden'][round.pf_number - 1],
             'physics_fight_name': params.fights['names'][round.pf_number - 1],
             'sister_tournament_postfix': 'physics_fights',
@@ -785,7 +689,7 @@ def round_detail(request, pk):
     )
 
 
-@user_passes_test(ninja_test, redirect_field_name=None, login_url='/%s/soon' % params.instance_name)
+@user_passes_test(ninja_test, redirect_field_name=None, login_url=f'/{params.instance_name}/soon')
 @cache_page(cache_duration)
 def physics_fight_detail(request, pfid):
     if float(pfid) not in list(range(1, npf_tot + 1)):
@@ -799,9 +703,7 @@ def physics_fight_detail(request, pfid):
 
         grades = JuryGrade.objects.filter(round__room=room, round__pf_number=pfid).order_by('round__round_number',
                                                                                             'jury__surname')
-        gradesdico = {}
-        for grade in grades:
-            gradesdico[grade.jury] = []
+        gradesdico = {grade.jury: [] for grade in grades}
         for grade in grades:
             gradesdico[grade.jury].append(grade)
 
@@ -813,9 +715,7 @@ def physics_fight_detail(request, pfid):
         meanroundsgrades = []
 
         for round in roomrounds:
-            meangrades = []
-            meangrades.append(round.score_reporter)
-            meangrades.append(round.score_opponent)
+            meangrades = [round.score_reporter, round.score_opponent]
             if round.reviewer_team or not params.optional_reviewers:
                 meangrades.append(round.score_reviewer)
             meanroundsgrades.append(meangrades)
@@ -824,7 +724,7 @@ def physics_fight_detail(request, pfid):
 
         # If a team (probably a reviewer) is not stated - just omit it
         if params.optional_reviewers:
-            teams_involved.pop(None, None);
+            teams_involved.pop(None, None)
 
         finished = (roomrounds.count() == len(teams_involved))
 
@@ -837,18 +737,10 @@ def physics_fight_detail(request, pfid):
         roundsgrades = [juryallgrades, meanroundsgrades, infos, summary_grades]
         roomgrades.append(roundsgrades)
 
-    return render(
-        request,
-        '%s/physics_fight_detail.html' % params.instance_name,
-        {
-            'params': params,
-            'roomgrades': roomgrades,
-            'ignore_rooms': int(pfid) > params.npf,
-            'fight_name': params.fights['names'][int(pfid) - 1],
-            'sister_tournament_postfix': 'physics_fights',
-            'no_round_played': rounds.count() == 0,
-        }
-    )
+    return render(request, f'{params.instance_name}/physics_fight_detail.html',
+                  {'params': params, 'roomgrades': roomgrades, 'ignore_rooms': int(pfid) > params.npf,
+                   'fight_name': params.fights['names'][int(pfid) - 1], 'sister_tournament_postfix': 'physics_fights',
+                   'no_round_played': rounds.count() == 0, })
 
 
 def create_summary(roomrounds, teams_involved=None, finished=None):

@@ -26,11 +26,7 @@ class UploadForm(forms.Form):
 
 def member_for_team(request):
     res = []
-    if request.user.is_authenticated():
-        if request.GET and 'team_id' in request.GET:
-            objs = Participant.objects.filter(team=request.GET['team_id'])
-            for o in objs:
-                res.append({'id': o.id, 'name': smart_text(o)})
-
-        # return HttpResponse(json.dumps(res), content_type="application/json")
+    if request.user.is_authenticated() and request.GET and 'team_id' in request.GET:
+        objs = Participant.objects.filter(team=request.GET['team_id'])
+        res.extend({'id': o.id, 'name': smart_text(o)} for o in objs)
     return JsonResponse({'res': res})

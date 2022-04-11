@@ -17,6 +17,7 @@ from django.utils.encoding import smart_text
 from django.utils.translation import ungettext, ugettext as _
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
+
 # GRAPPELLI IMPORTS
 from ..settings import AUTOCOMPLETE_LIMIT, AUTOCOMPLETE_SEARCH_FIELDS
 

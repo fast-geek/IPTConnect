@@ -27,20 +27,17 @@ def _load_module(path):
 
     try:
         mod = import_module(module)
-    except ImportError:
-        raise ImproperlyConfigured(
-            'Error importing CAN_LOGIN_AS function: {}'.format(module)
-        )
-    except ValueError:
-        raise ImproperlyConfigured('Error importing CAN_LOGIN_AS'
-                                   ' function. Is CAN_LOGIN_AS a'
-                                   ' string?')
+    except ImportError as e:
+        raise ImproperlyConfigured(f'Error importing CAN_LOGIN_AS function: {module}') from e
+
+    except ValueError as e:
+        raise ImproperlyConfigured('Error importing CAN_LOGIN_AS' ' function. Is CAN_LOGIN_AS a' ' string?') from e
 
     try:
         can_login_as = getattr(mod, attr)
-    except AttributeError:
-        raise ImproperlyConfigured('Module {0} does not define a {1} '
-                                   'function.'.format(module, attr))
+    except AttributeError as exc:
+        raise ImproperlyConfigured('Module {0} does not define a {1} ' 'function.'.format(module, attr)) from exc
+
     return can_login_as
 
 

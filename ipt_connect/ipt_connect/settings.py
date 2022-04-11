@@ -53,7 +53,7 @@ INSTALLED_APPS = (
                      'django.contrib.humanize',
                  ) + INSTALLED_TOURNAMENTS
 
-MIGRATION_MODULES = dict([(app, app + '.migrations.' + app) for app in INSTALLED_TOURNAMENTS])
+MIGRATION_MODULES = dict([(app, f'{app}.migrations.{app}') for app in INSTALLED_TOURNAMENTS])
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

@@ -36,18 +36,12 @@ def cache_per_user(ttl=None, prefix=None):
             can_cache = request.user.is_anonymous() and request.method == 'GET'
 
             # Gera a chave do cache
-            if prefix:
-                CACHE_KEY = '%s_%s' % (prefix, 'anonymous')
-            else:
-                CACHE_KEY = 'view_cache_%s_%s_%s' % (function.__name__, request.get_full_path(), 'anonymous')
 
-            if can_cache:
-                response = cache.get(CACHE_KEY, None)
-            else:
-                response = None
+            CACHE_KEY = f'{prefix}_anonymous' if prefix else f'view_cache_{function.__name__}_{request.get_full_path()}_anonymous'
 
+            response = cache.get(CACHE_KEY, None) if can_cache else None
             if not response:
-                print('Not in cache: %s' % (CACHE_KEY))
+                print(f'Not in cache: {CACHE_KEY}')
                 response = function(request, *args, **kwargs)
                 if can_cache:
                     cache.set(CACHE_KEY, response, ttl)

@@ -8,6 +8,7 @@ from django.apps import apps as django_apps
 # DJANGO IMPORTS
 from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy as _
+
 # GRAPPELLI IMPORTS
 from ..dashboard.utils import AppListElementMixin
 

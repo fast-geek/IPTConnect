@@ -123,9 +123,8 @@ def sort_raw_tactics_data(problems_dict):
         'opposed_by_opponent',
         'reported_by_opponent',
     ]:
-        for problem in list(problems_dict)[::-1]:
-            if len(problems_dict[problem][reason]) > 0:
-                bans.append((problem, problems_dict.pop(problem)))
+        bans.extend((problem, problems_dict.pop(problem)) for problem in list(problems_dict)[::-1] if
+                    len(problems_dict[problem][reason]) > 0)
 
     # The second list consists of available problems
 
@@ -139,14 +138,12 @@ def sort_raw_tactics_data(problems_dict):
         'reviewed_by_reporter',
         'tried_by_reporter',
     ]:
-        for problem in list(problems_dict):
-            if len(problems_dict[problem][reason]) > 0:
-                info.append((problem, problems_dict.pop(problem)))
+        info.extend((problem, problems_dict.pop(problem)) for problem in list(problems_dict) if
+                    len(problems_dict[problem][reason]) > 0)
 
     # And then we append all the other problems
 
-    for problem in list(problems_dict):
-        info.append((problem, problems_dict.pop(problem)))
+    info.extend((problem, problems_dict.pop(problem)) for problem in list(problems_dict))
 
     return bans, info
 
@@ -213,11 +210,11 @@ class TacticsForm(forms.Form):
         team_choices = [(team.pk, team) for team in all_teams]
         reporter_team = forms.ChoiceField(label='Reporter team', choices=team_choices)
         opponent_team = forms.ChoiceField(label='Opponent team', choices=team_choices)
-    except:
+    except Exception:
         pass
 
 
-@user_passes_test(ninja_test, redirect_field_name=None, login_url='/%s/soon' % params.instance_name)
+@user_passes_test(ninja_test, redirect_field_name=None, login_url=f'/{params.instance_name}/soon')
 @cache_page(cache_duration)
 def build_tactics(request):
     # if this is a POST request we need to process the form data
@@ -231,14 +228,9 @@ def build_tactics(request):
                 Team.objects.get(pk=form['opponent_team'].value()),
             ))
             tactics = (tactics[0][::-1], tactics[1])
-            return render(request, '%s/build_tactics.html' % params.instance_name, {
-                'params': params,
-                'form': form,
-                'tactics': tactics,
-            })
-
-    # if a GET (or any other method) we'll create a blank form
+            return render(request, f'{params.instance_name}/build_tactics.html',
+                          {'params': params, 'form': form, 'tactics': tactics, })
     else:
         form = TacticsForm()
 
-    return render(request, '%s/build_tactics.html' % params.instance_name, {'params': params, 'form': form})
+    return render(request, f'{params.instance_name}/build_tactics.html', {'params': params, 'form': form})

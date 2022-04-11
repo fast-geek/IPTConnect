@@ -1,5 +1,4 @@
 import os
-import urllib.error
 import urllib.parse
 from urllib.request import urlopen
 

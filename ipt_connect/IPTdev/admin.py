@@ -2,7 +2,6 @@
 from django.contrib import admin
 from solo.admin import SingletonModelAdmin
 
-from . import parameters as params
 from .model_SupplementaryMaterial import *
 from .models import *
 
@@ -18,7 +17,7 @@ from .models import SiteConfiguration
 try:
     # get_solo will create the item if it does not already exist
     config = SiteConfiguration.get_solo()
-except:
+except Exception:
     pass
 
 
@@ -101,7 +100,9 @@ class Roundadmin(admin.ModelAdmin):
 
     class Media:
         js = (
-        params.instance_name + '/js/admin/js/jquery.js', params.instance_name + '/js/admin/js/participant_fill.js',)
+            params.instance_name + '/js/admin/js/jquery.js', params.instance_name + '/js/admin/js/participant_fill.js',)
+
+
 # TODO: Display the full name+surname of the reporter, opponent and reviewer in the admin view
 
 
@@ -112,24 +113,22 @@ class TeamAdmin(admin.ModelAdmin):
         list_display = ('name', 'surname', 'IOC')
     search_fields = ('name', 'IOC')
 
-    inlines = []
-    if params.enable_apriori_rejections:
-        inlines = [AprioriRejectionInline]
-
+    inlines = [AprioriRejectionInline] if params.enable_apriori_rejections else []
     inlines += [SupplementaryMaterialInline]
 
 
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = (
-    'surname', 'name', 'team', 'affiliation', 'email', 'phone_number', 'role', 'gender', 'birthdate', 'veteran', 'diet',
-    'shirt_size', 'mixed_gender_accommodation', 'remark')
+        'surname', 'name', 'team', 'affiliation', 'email', 'phone_number', 'role', 'gender', 'birthdate', 'veteran',
+        'diet',
+        'shirt_size', 'mixed_gender_accommodation', 'remark')
     search_fields = ('surname', 'name')
     list_filter = ('team', 'gender', 'role', 'veteran', 'diet', 'shirt_size', 'mixed_gender_accommodation')
 
     def save_model(self, request, obj, form, change):
-        if not (request.user.is_superuser) and not (request.user.username == 'magnusson'):
+        if not (request.user.is_superuser) and request.user.username != 'magnusson':
             u = User.objects.get(username=request.user.username)
-            obj.team = getattr(u, 'Team_' + params.instance_name)
+            obj.team = getattr(u, f'Team_{params.instance_name}')
             obj.save()
         obj.save()
 
@@ -138,7 +137,7 @@ class ParticipantAdmin(admin.ModelAdmin):
         u = User.objects.get(username=request.user.username)
         if request.user.is_superuser or request.user.username == 'magnusson':
             return qs
-        return qs.filter(team=getattr(u, 'Team_' + params.instance_name))
+        return qs.filter(team=getattr(u, f'Team_{params.instance_name}'))
 
 
 class JuryAdmin(admin.ModelAdmin):

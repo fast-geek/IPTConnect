@@ -4,9 +4,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 
-tournament_overview = importlib.import_module(
-    settings.INSTALLED_TOURNAMENTS[0] + '.views'
-).tournament_overview
+tournament_overview = importlib.import_module(f'{settings.INSTALLED_TOURNAMENTS[0]}.views').tournament_overview
 
 urlpatterns = [
     # Examples:
@@ -20,9 +18,7 @@ urlpatterns = [
     url(r'^admin/', include('loginas.urls')),
 ]
 
-for tournament in settings.INSTALLED_TOURNAMENTS:
-    urlpatterns.append(
-        url(r'^' + tournament + '/', include(tournament + '.urls', namespace=tournament)),
-    )
+urlpatterns.extend(url(f'^{tournament}/', include(f'{tournament}.urls', namespace=tournament)) for tournament in
+                   settings.INSTALLED_TOURNAMENTS)
 
 admin.site.site_header = 'IPT administration'
