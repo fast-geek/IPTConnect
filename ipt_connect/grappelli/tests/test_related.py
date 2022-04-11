@@ -15,7 +15,7 @@ except ImportError:
     from django.utils import simplejson as json
 
 # GRAPPELLI IMPORTS
-from grappelli.tests.models import Category, Entry
+from ..tests.models import Category, Entry
 
 
 @override_settings(GRAPPELLI_AUTOCOMPLETE_LIMIT=10)

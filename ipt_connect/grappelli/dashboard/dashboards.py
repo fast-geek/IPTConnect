@@ -10,8 +10,8 @@ from django.core.urlresolvers import reverse
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 # GRAPPELLI IMPORTS
-from grappelli.dashboard import modules
-from grappelli.dashboard.utils import get_admin_site_name
+from ..dashboard import modules
+from ..dashboard.utils import get_admin_site_name
 
 
 class Dashboard(six.with_metaclass(forms.MediaDefiningClass)):

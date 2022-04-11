@@ -8,7 +8,7 @@ class Registry(object):
     registry = {}
 
     def register(cls, klass, app_name):
-        from grappelli.dashboard.dashboards import Dashboard
+        from ..dashboard.dashboards import Dashboard
         if not issubclass(klass, Dashboard):
             raise ValueError('%s is not an instance of Dashboard' % klass)
         if app_name in cls.registry:

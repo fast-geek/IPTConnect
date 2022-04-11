@@ -4,7 +4,7 @@
 from django.contrib import admin
 
 # PROJECT IMPORTS
-from grappelli.tests.models import Category, Entry
+from ..tests.models import Category, Entry
 
 site = admin.AdminSite(name="Admin Site")
 

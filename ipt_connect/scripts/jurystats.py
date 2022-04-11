@@ -6,10 +6,10 @@ import django
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ipt_connect.IPTdev.models import *
+
 os.environ['DJANGO_SETTINGS_MODULE'] = "ipt_connect.settings"
 django.setup()
-
-from IPTdev.models import *
 
 jurys = Jury.objects.all()
 

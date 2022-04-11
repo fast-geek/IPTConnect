@@ -1,7 +1,4 @@
-try:
-    from importlib import import_module
-except ImportError:
-    from django.utils.importlib import import_module
+from importlib import import_module
 
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured

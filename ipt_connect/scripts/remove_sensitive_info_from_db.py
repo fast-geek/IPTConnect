@@ -8,6 +8,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = "ipt_connect.settings"
 
 django.setup()
 
+# TODO remove unresolved tables
 from IPT2016 import models as m16
 from IPT2017 import models as m17
 from FPT2017 import models as f17

@@ -1,22 +1,21 @@
 # coding=utf-8
-import os
 import sys
 
 import django
+
+from ipt_connect.IPTdev.models import *
 
 os.environ['DJANGO_SETTINGS_MODULE'] = "ipt_connect.settings"
 django.setup()
 
 populate_db = False  # If you start from a fresh or flushed db and want to repopulate it quickly with test data.
 
-from IPT2016.models import *
-
 if not populate_db:
 
     teams = Team.objects.all()
     participants = Participant.objects.all()
     rooms = Room.objects.all()
-    pfs = PhysicsFight.objects.all()
+    pfs = PhysicsFight.objects.all()  # TODO remove unresolved object
 
     for participant in participants:
         # participant.ranking(roundnumber=None, pool='all', verbose=True)

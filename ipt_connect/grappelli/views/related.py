@@ -18,7 +18,7 @@ from django.utils.translation import ungettext, ugettext as _
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
 # GRAPPELLI IMPORTS
-from grappelli.settings import AUTOCOMPLETE_LIMIT, AUTOCOMPLETE_SEARCH_FIELDS
+from ..settings import AUTOCOMPLETE_LIMIT, AUTOCOMPLETE_SEARCH_FIELDS
 
 
 def get_label(f):

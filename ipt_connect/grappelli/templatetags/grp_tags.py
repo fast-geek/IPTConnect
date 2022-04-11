@@ -4,6 +4,9 @@ import json
 # python imports
 from functools import wraps
 
+# grappelli imports
+from ipt_connect.grappelli.settings import *
+
 try:
     from django.contrib.auth import get_user_model
 
@@ -20,10 +23,6 @@ from django.utils.translation import get_language
 from django.template.loader import get_template
 from django.template.context import Context
 from django.utils.translation import ugettext as _
-
-# grappelli imports
-from grappelli.settings import ADMIN_TITLE, ADMIN_URL, SWITCH_USER, SWITCH_USER_ORIGINAL, SWITCH_USER_TARGET, \
-    CLEAN_INPUT_TYPES
 
 register = template.Library()
 

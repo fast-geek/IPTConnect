@@ -4,7 +4,7 @@
 from django.conf.urls import include, url
 
 # GRAPPELLI IMPORTS
-from grappelli.tests import admin
+from ..tests import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

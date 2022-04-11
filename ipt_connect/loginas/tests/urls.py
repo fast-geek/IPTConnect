@@ -1,5 +1,5 @@
 from django.conf.urls import *
-from loginas.tests import views
+from ..tests import views
 
 urlpatterns = [
     url(r"^$", views.index, name="index"),

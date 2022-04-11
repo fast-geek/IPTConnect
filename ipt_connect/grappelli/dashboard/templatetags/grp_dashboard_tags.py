@@ -13,7 +13,7 @@ from django import template
 from django.core.urlresolvers import reverse
 
 # GRAPPELLI IMPORTS
-from grappelli.dashboard.utils import get_admin_site_name, get_index_dashboard
+from ipt_connect.grappelli.dashboard.utils import get_index_dashboard, get_admin_site_name
 
 register = template.Library()
 tag_func = register.inclusion_tag('grappelli/dashboard/dummy.html', takes_context=True)

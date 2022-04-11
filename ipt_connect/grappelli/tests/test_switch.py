@@ -8,9 +8,9 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
-from grappelli.templatetags.grp_tags import switch_user_dropdown
+from ..templatetags.grp_tags import switch_user_dropdown
 # GRAPPELLI IMPORTS
-from grappelli.tests.models import Category
+from ..tests.models import Category
 
 
 @override_settings(GRAPPELLI_SWITCH_USER=True)

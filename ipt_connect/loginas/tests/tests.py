@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function, absolute_import
 
-try:
-    from urllib.parse import urlsplit
-except ImportError:
-    from urlparse import urlsplit
 from datetime import timedelta
+from urllib.parse import urlsplit
 
 from django.conf import settings as django_settings
 from django.test import Client
@@ -19,7 +16,7 @@ from django.contrib.messages.storage.cookie import CookieStorage
 from django.utils.six import text_type
 from django.utils import timezone
 
-from loginas import settings as la_settings
+from .. import settings as la_settings
 
 try:
     import imp
@@ -36,12 +33,12 @@ class override_settings(override_settings_orig):
 
     def enable(self):
         super(override_settings, self).enable()
-        from loginas import settings as loginas_settings
+        from .. import settings as loginas_settings
         reload(loginas_settings)
 
     def disable(self):
         super(override_settings, self).disable()
-        from loginas import settings as loginas_settings
+        from .. import settings as loginas_settings
         reload(loginas_settings)
 
 

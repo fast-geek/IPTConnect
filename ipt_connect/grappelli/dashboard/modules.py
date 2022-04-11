@@ -9,7 +9,7 @@ from django.apps import apps as django_apps
 from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy as _
 # GRAPPELLI IMPORTS
-from grappelli.dashboard.utils import AppListElementMixin
+from ..dashboard.utils import AppListElementMixin
 
 
 class DashboardModule(object):
