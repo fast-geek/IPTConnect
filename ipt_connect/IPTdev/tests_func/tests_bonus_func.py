@@ -4,7 +4,6 @@ from ..func_bonus import *
 
 
 class Test(TestCase):
-
     def test_distribute_bonus(self):
         input_data = [
             [50, 50],

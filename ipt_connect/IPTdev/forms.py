@@ -20,13 +20,14 @@ from .models import Participant
 #
 #    veteran = forms.BooleanField(help_text="Have you already participated in the tournament?", required=True)
 
+
 class UploadForm(forms.Form):
-    csvfile = forms.FileField(label='Select a CSV file:')
+    csvfile = forms.FileField(label="Select a CSV file:")
 
 
 def member_for_team(request):
     res = []
-    if request.user.is_authenticated() and request.GET and 'team_id' in request.GET:
-        objs = Participant.objects.filter(team=request.GET['team_id'])
-        res.extend({'id': o.id, 'name': smart_text(o)} for o in objs)
-    return JsonResponse({'res': res})
+    if request.user.is_authenticated() and request.GET and "team_id" in request.GET:
+        objs = Participant.objects.filter(team=request.GET["team_id"])
+        res.extend({"id": o.id, "name": smart_text(o)} for o in objs)
+    return JsonResponse({"res": res})

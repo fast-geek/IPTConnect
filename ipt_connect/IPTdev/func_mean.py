@@ -1,5 +1,6 @@
 # All functions for calculating mean value are independent of other models, so don't use import
 
+
 def mean(vec):
     return float(sum(vec)) / len(vec) if len(vec) != 0 else 0.0
 
@@ -13,7 +14,7 @@ def ipt_mean(vec):
     nhigh = nreject / 2
     nlow = nreject - nhigh
 
-    vec = vec[nlow:] if nhigh == 0 else vec[nlow: -nhigh]
+    vec = vec[nlow:] if nhigh == 0 else vec[nlow:-nhigh]
     return mean(vec)
 
 

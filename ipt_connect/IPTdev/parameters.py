@@ -9,33 +9,35 @@ from .get_script_dir import get_script_dir
 # but different data by a simple symlink creation
 # (don't forget to plug the new application to django).
 instance_name = get_script_dir(False)
-instance_name = list(reversed(instance_name.rsplit('/', 1)))[0]
-instance_name = list(reversed(instance_name.rsplit('\\', 1)))[0]
+instance_name = list(reversed(instance_name.rsplit("/", 1)))[0]
+instance_name = list(reversed(instance_name.rsplit("\\", 1)))[0]
 
 NAME = {
-    'short': 'IPT dev',
-    'full': 'International Physicists\' Tournament - Development Instance',
+    "short": "IPT dev",
+    "full": "International Physicists' Tournament - Development Instance",
     # ... and the name used in tournament overview
-    'front': '11th International Physicists\' Tournament',
+    "front": "11th International Physicists' Tournament",
 }
 
 # Tournaments to switch to by the menu
 # Usually you should set it to None
 # This is useful only for development and first stages of Three Science Tournament
 sister_tournaments = (
-    ('IPT dev', '/IPT' + 'dev/'),
-    ('IPT dev (pf2)', '/IPT' + 'dev_pf2/'),
+    ("IPT dev", "/IPT" + "dev/"),
+    ("IPT dev (pf2)", "/IPT" + "dev_pf2/"),
 )
 
-poster_url = 'https://hsto.org/webt/zu/4_/cw/zu4_cwveq1izw4jst5yugtxng5q.png'
+poster_url = "https://hsto.org/webt/zu/4_/cw/zu4_cwveq1izw4jst5yugtxng5q.png"
 
-website_url = 'http://dev.iptnet.info'
+website_url = "http://dev.iptnet.info"
 
-repo_url = 'https://github.com/IPTnet/ipt_connect'
+repo_url = "https://github.com/IPTnet/ipt_connect"
 
 # Models parameters
 npf = 4  # Number of selective (qualifying) Physics fights
-semifinals_quantity = 2  # Quantity of semifinals. Every semifinal should be a separate fight!
+semifinals_quantity = (
+    2  # Quantity of semifinals. Every semifinal should be a separate fight!
+)
 with_final_pf = True  # Is there a Final Fight ?
 
 ## Rejections
@@ -67,18 +69,18 @@ score_precision = None  # TODO: use the same precision when displaying the resul
 
 # Personal ranking
 personal_ranking = {
-    'active': True,
-    'rep_threshold': 5,
-    'opp_threshold': 5,
-    'rev_threshold': 5,
-    'rep_coeff': 3,
-    'opp_coeff': 2,
-    'rev_coeff': 1,
-    'up_to_fight': npf,  # to exclude Final and Semifinal grades; may be an arbitrary integer
+    "active": True,
+    "rep_threshold": 5,
+    "opp_threshold": 5,
+    "rev_threshold": 5,
+    "rep_coeff": 3,
+    "opp_coeff": 2,
+    "rev_coeff": 1,
+    "up_to_fight": npf,  # to exclude Final and Semifinal grades; may be an arbitrary integer
 }
 
 # Calculating the mean
-mean = 'ipt_mean'  # String with name of function for calculating mean (ipt_mean or iypt_mean)
+mean = "ipt_mean"  # String with name of function for calculating mean (ipt_mean or iypt_mean)
 
 # Is the fight status displayed?
 # Looks like there are some problems with it, so making it switchable
@@ -130,8 +132,17 @@ optional_reviewers = True
 # However, it looks like the fight structure is defined far before the tournament starts,
 # so you will have enough time to open this file and edit everything you want.
 # If you think that I'm wrong, feel free to fork me!
-fights = {'bonus_multipliers': [1, 1, 1, 1, 2, 2, 0],
-          'challenge_procedure': [True, True, True, True, True, True, False],
-          'problems_forbidden': [True, True, True, True, True, True, False],
-          'names': ['Selective Fight 1', 'Selective Fight 2', 'Selective Fight 3', 'Selective Fight 4', 'Semifinal 1',
-                    'Semifinal 2', f'{instance_name} Final']}
+fights = {
+    "bonus_multipliers": [1, 1, 1, 1, 2, 2, 0],
+    "challenge_procedure": [True, True, True, True, True, True, False],
+    "problems_forbidden": [True, True, True, True, True, True, False],
+    "names": [
+        "Selective Fight 1",
+        "Selective Fight 2",
+        "Selective Fight 3",
+        "Selective Fight 4",
+        "Semifinal 1",
+        "Semifinal 2",
+        f"{instance_name} Final",
+    ],
+}

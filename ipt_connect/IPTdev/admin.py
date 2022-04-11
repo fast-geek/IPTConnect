@@ -47,20 +47,34 @@ class AprioriRejectionInline(admin.TabularInline):
 
 
 class Roundadmin(admin.ModelAdmin):
-    list_display = ('pf_number', 'round_number', 'room')
-    list_filter = ('pf_number', 'round_number', 'room')
+    list_display = ("pf_number", "round_number", "room")
+    list_filter = ("pf_number", "round_number", "room")
     fieldsets = [
-        ('General Information', {'fields': [
-            ('pf_number', "round_number", "room"), ("reporter_team", "opponent_team", "reviewer_team")]}),
-        (None, {'fields': [
-            ("reporter"),
-            ("reporter_2"),
-            ('opponent'),
-            ('reviewer'),
-            # ('problem_presented'),
-            # TODO: do the same in python-ish way
-            ('problem_presented', "bonus_points_reporter") if params.manual_bonus_points else ('problem_presented'),
-        ]})
+        (
+            "General Information",
+            {
+                "fields": [
+                    ("pf_number", "round_number", "room"),
+                    ("reporter_team", "opponent_team", "reviewer_team"),
+                ]
+            },
+        ),
+        (
+            None,
+            {
+                "fields": [
+                    "reporter",
+                    "reporter_2",
+                    "opponent",
+                    "reviewer",
+                    # ('problem_presented'),
+                    # TODO: do the same in python-ish way
+                    ("problem_presented", "bonus_points_reporter")
+                    if params.manual_bonus_points
+                    else "problem_presented",
+                ]
+            },
+        ),
     ]
 
     # Jury grades. We always have them!
@@ -100,7 +114,9 @@ class Roundadmin(admin.ModelAdmin):
 
     class Media:
         js = (
-            params.instance_name + '/js/admin/js/jquery.js', params.instance_name + '/js/admin/js/participant_fill.js',)
+            params.instance_name + "/js/admin/js/jquery.js",
+            params.instance_name + "/js/admin/js/participant_fill.js",
+        )
 
 
 # TODO: Display the full name+surname of the reporter, opponent and reviewer in the admin view
@@ -108,10 +124,10 @@ class Roundadmin(admin.ModelAdmin):
 
 class TeamAdmin(admin.ModelAdmin):
     if params.manual_bonus_points:
-        list_display = ('name', 'surname', 'IOC', 'bonus_points')
+        list_display = ("name", "surname", "IOC", "bonus_points")
     else:
-        list_display = ('name', 'surname', 'IOC')
-    search_fields = ('name', 'IOC')
+        list_display = ("name", "surname", "IOC")
+    search_fields = ("name", "IOC")
 
     inlines = [AprioriRejectionInline] if params.enable_apriori_rejections else []
     inlines += [SupplementaryMaterialInline]
@@ -119,32 +135,75 @@ class TeamAdmin(admin.ModelAdmin):
 
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = (
-        'surname', 'name', 'team', 'affiliation', 'email', 'phone_number', 'role', 'gender', 'birthdate', 'veteran',
-        'diet',
-        'shirt_size', 'mixed_gender_accommodation', 'remark')
-    search_fields = ('surname', 'name')
-    list_filter = ('team', 'gender', 'role', 'veteran', 'diet', 'shirt_size', 'mixed_gender_accommodation')
+        "surname",
+        "name",
+        "team",
+        "affiliation",
+        "email",
+        "phone_number",
+        "role",
+        "gender",
+        "birthdate",
+        "veteran",
+        "diet",
+        "shirt_size",
+        "mixed_gender_accommodation",
+        "remark",
+    )
+    search_fields = ("surname", "name")
+    list_filter = (
+        "team",
+        "gender",
+        "role",
+        "veteran",
+        "diet",
+        "shirt_size",
+        "mixed_gender_accommodation",
+    )
 
     def save_model(self, request, obj, form, change):
-        if not (request.user.is_superuser) and request.user.username != 'magnusson':
+        if not (request.user.is_superuser) and request.user.username != "magnusson":
             u = User.objects.get(username=request.user.username)
-            obj.team = getattr(u, f'Team_{params.instance_name}')
+            obj.team = getattr(u, f"Team_{params.instance_name}")
             obj.save()
         obj.save()
 
     def get_queryset(self, request):
         qs = super(ParticipantAdmin, self).get_queryset(request)
         u = User.objects.get(username=request.user.username)
-        if request.user.is_superuser or request.user.username == 'magnusson':
+        if request.user.is_superuser or request.user.username == "magnusson":
             return qs
-        return qs.filter(team=getattr(u, f'Team_{params.instance_name}'))
+        return qs.filter(team=getattr(u, f"Team_{params.instance_name}"))
 
 
 class JuryAdmin(admin.ModelAdmin):
     # TODO: unhardcode PF quantity!!...
-    list_display = ('surname', 'name', 'team', 'affiliation', 'pf1', 'pf2', 'pf3', 'pf4', 'final', 'email', 'remark',)
-    list_filter = ('team', 'pf1', 'pf2', 'pf3', 'pf4', 'final',)
-    search_fields = ('surname', 'name', 'affiliation',)
+    list_display = (
+        "surname",
+        "name",
+        "team",
+        "affiliation",
+        "pf1",
+        "pf2",
+        "pf3",
+        "pf4",
+        "final",
+        "email",
+        "remark",
+    )
+    list_filter = (
+        "team",
+        "pf1",
+        "pf2",
+        "pf3",
+        "pf4",
+        "final",
+    )
+    search_fields = (
+        "surname",
+        "name",
+        "affiliation",
+    )
 
 
 # Register your models here.

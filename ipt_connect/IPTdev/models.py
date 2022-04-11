@@ -21,7 +21,9 @@ from .func_bonus import distribute_bonus_points
 
 # Useful static variables
 selective_fights = [i + 1 for i in range(params.npf)]
-selective_fights_and_semifinals = [i + 1 for i in range(params.npf + params.semifinals_quantity)]
+selective_fights_and_semifinals = [
+    i + 1 for i in range(params.npf + params.semifinals_quantity)
+]
 semifinals = [i + 1 for i in range(params.npf, params.npf + params.semifinals_quantity)]
 npf_tot = params.npf + params.semifinals_quantity + int(params.with_final_pf)
 final_fight_number = params.npf + params.semifinals_quantity + 1
@@ -33,19 +35,24 @@ special_mean = getattr(means, params.mean)
 
 @deconstructible
 class UploadToPathAndRename(object):
-
     def __init__(self, path):
         self.sub_path = path
 
     def __call__(self, instance, filename):
-        ext = filename.split('-')[-1]
+        ext = filename.split("-")[-1]
         # get filename
         if instance.pk:
-            filename = iri_to_uri(str.replace(f'{instance.team}_{instance.surname}_{instance.name}.{ext}', ' ', '_'))
+            filename = iri_to_uri(
+                str.replace(
+                    f"{instance.team}_{instance.surname}_{instance.name}.{ext}",
+                    " ",
+                    "_",
+                )
+            )
 
         else:
             # set filename as random string
-            filename = f'{uuid4().hex}.{ext}'
+            filename = f"{uuid4().hex}.{ext}"
         # return the whole path to the file
         return os.path.join(self.sub_path, filename)
 
@@ -55,57 +62,92 @@ class Participant(models.Model):
     This class represent the basic model of our program, a participant.
     It can be a student competing, a team-leader, a jury member, an IOC or an external jury or even a staff, basically anyone taking part in the tournament."""
 
-    GENDER_CHOICES = (('M', 'Male'), ('F', 'Female'), ('D', 'Decline to report'))
+    GENDER_CHOICES = (("M", "Male"), ("F", "Female"), ("D", "Decline to report"))
 
-    ROLE_CHOICES = (('TM', 'Team Member'), ('TC', 'Team Captain'), ('TL', 'Team Leader'), ('ACC', 'Accompanying'))
+    ROLE_CHOICES = (
+        ("TM", "Team Member"),
+        ("TC", "Team Captain"),
+        ("TL", "Team Leader"),
+        ("ACC", "Accompanying"),
+    )
 
-    DIET_CHOICES = (('NO', 'No specific diet'), ('NOPORK', 'No pork'), ('NOMEAT', 'No meat'), ('NOFISH', 'No fish'),
-                    ('NOMEAT_NOEGG', 'No meat, No eggs'), ('OTHER', 'Other (see remarks)'))
+    DIET_CHOICES = (
+        ("NO", "No specific diet"),
+        ("NOPORK", "No pork"),
+        ("NOMEAT", "No meat"),
+        ("NOFISH", "No fish"),
+        ("NOMEAT_NOEGG", "No meat, No eggs"),
+        ("OTHER", "Other (see remarks)"),
+    )
 
     SHIRT_SIZES = (
-        ('S', 'Small'),
-        ('M', 'Medium'),
-        ('L', 'Large'),
-        ('XL', 'Extra Large'),
+        ("S", "Small"),
+        ("M", "Medium"),
+        ("L", "Large"),
+        ("XL", "Extra Large"),
     )
 
     STATUS_CHOICES = (
-        ('B', 'Bachelor student'),
-        ('M', 'Master student'),
-        ('S', 'Specialist student'),
-        ('O', 'Other')
+        ("B", "Bachelor student"),
+        ("M", "Master student"),
+        ("S", "Specialist student"),
+        ("O", "Other"),
     )
 
     # parameters
-    name = models.CharField(max_length=50, default=None, verbose_name='Name')
-    surname = models.CharField(max_length=50, default=None, verbose_name='Surname')
-    gender = models.CharField(blank=True, max_length=1, choices=GENDER_CHOICES, verbose_name='Gender')
-    email = models.EmailField(blank=True,
-                              help_text='This address will be used to send the participant every important infos about the tournament.',
-                              verbose_name='Email')
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
-                                 message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
-    phone_number = models.CharField(max_length=20, validators=[phone_regex], blank=True,
-                                    help_text="Compulsory for the Team Leaders.")  # validators should be a list
+    name = models.CharField(max_length=50, default=None, verbose_name="Name")
+    surname = models.CharField(max_length=50, default=None, verbose_name="Surname")
+    gender = models.CharField(
+        blank=True, max_length=1, choices=GENDER_CHOICES, verbose_name="Gender"
+    )
+    email = models.EmailField(
+        blank=True,
+        help_text="This address will be used to send the participant every important infos about the tournament.",
+        verbose_name="Email",
+    )
+    phone_regex = RegexValidator(
+        regex=r"^\+?1?\d{9,15}$",
+        message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.",
+    )
+    phone_number = models.CharField(
+        max_length=20,
+        validators=[phone_regex],
+        blank=True,
+        help_text="Compulsory for the Team Leaders.",
+    )  # validators should be a list
     passport_number = models.CharField(blank=True, max_length=50)
-    birthdate = models.DateField(default='1900-01-31', verbose_name='Birthdate')
+    birthdate = models.DateField(default="1900-01-31", verbose_name="Birthdate")
     # photo = models.ImageField(upload_to=UploadToPathAndRename(params.instance_name+'/id_photo'),help_text="Please use a clear ID photo. This will be used for badges and transportation cards.", null=True)
-    team = models.ForeignKey('Team', null=True, verbose_name='Team')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES,
-                            help_text="The team must consist of a Team Captain (student), between two and five Team Members (students), and between one and two Team Leaders (Prof., PhD, Postdoc in physics). Don't forget to register yourself!",
-                            default="TM", verbose_name='Role')
-    affiliation = models.CharField(blank=True, max_length=50, default='XXX University')
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, blank=True, verbose_name='Student status')
-    veteran = models.BooleanField(default=False,
-                                  help_text="Has the participant already participated in the tournament? (informative only)",
-                                  verbose_name='Veteran')
-    diet = models.CharField(blank=True, max_length=20, choices=DIET_CHOICES,
-                            help_text='Does the participant have a specific diet?')
-    mixed_gender_accommodation = models.BooleanField(default=True,
-                                                     help_text="Is it ok for the participant to be in a mixed gender hotel room?",
-                                                     verbose_name='Mixed gender accommodation?')
+    team = models.ForeignKey("Team", null=True, verbose_name="Team")
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        help_text="The team must consist of a Team Captain (student), between two and five Team Members (students), and between one and two Team Leaders (Prof., PhD, Postdoc in physics). Don't forget to register yourself!",
+        default="TM",
+        verbose_name="Role",
+    )
+    affiliation = models.CharField(blank=True, max_length=50, default="XXX University")
+    status = models.CharField(
+        max_length=1, choices=STATUS_CHOICES, blank=True, verbose_name="Student status"
+    )
+    veteran = models.BooleanField(
+        default=False,
+        help_text="Has the participant already participated in the tournament? (informative only)",
+        verbose_name="Veteran",
+    )
+    diet = models.CharField(
+        blank=True,
+        max_length=20,
+        choices=DIET_CHOICES,
+        help_text="Does the participant have a specific diet?",
+    )
+    mixed_gender_accommodation = models.BooleanField(
+        default=True,
+        help_text="Is it ok for the participant to be in a mixed gender hotel room?",
+        verbose_name="Mixed gender accommodation?",
+    )
     shirt_size = models.CharField(blank=True, max_length=2, choices=SHIRT_SIZES)
-    remark = models.TextField(blank=True, verbose_name='Remarks')
+    remark = models.TextField(blank=True, verbose_name="Remarks")
 
     total_points = models.FloatField(default=0.0, editable=False)
     mean_score_as_reporter = models.FloatField(default=0.0, editable=False)
@@ -120,7 +162,7 @@ class Participant(models.Model):
         """
         :return: return the full name of the participant
         """
-        return f'{self.name} {self.surname}'
+        return f"{self.name} {self.surname}"
 
     def __unicode__(self):
         """
@@ -134,15 +176,27 @@ class Participant(models.Model):
         rounds_as_opponent = Round.objects.filter(opponent=self)
         rounds_as_reviewer = Round.objects.filter(reviewer=self)
 
-        self.tot_score_as_reporter = sum(round.score_reporter for round in rounds_as_reporter)
+        self.tot_score_as_reporter = sum(
+            round.score_reporter for round in rounds_as_reporter
+        )
 
-        self.tot_score_as_opponent = sum(round.score_opponent for round in rounds_as_opponent)
+        self.tot_score_as_opponent = sum(
+            round.score_opponent for round in rounds_as_opponent
+        )
 
-        self.tot_score_as_reviewer = sum(round.score_reviewer for round in rounds_as_reviewer)
+        self.tot_score_as_reviewer = sum(
+            round.score_reviewer for round in rounds_as_reviewer
+        )
 
-        self.mean_score_as_reporter = self.tot_score_as_reporter / max(len(rounds_as_reporter), 1)
-        self.mean_score_as_opponent = self.tot_score_as_opponent / max(len(rounds_as_opponent), 1)
-        self.mean_score_as_reviewer = self.tot_score_as_reviewer / max(len(rounds_as_reviewer), 1)
+        self.mean_score_as_reporter = self.tot_score_as_reporter / max(
+            len(rounds_as_reporter), 1
+        )
+        self.mean_score_as_opponent = self.tot_score_as_opponent / max(
+            len(rounds_as_opponent), 1
+        )
+        self.mean_score_as_reviewer = self.tot_score_as_reviewer / max(
+            len(rounds_as_reviewer), 1
+        )
 
         res = 0.0
         res += sum(round.points_reporter for round in rounds_as_reporter)
@@ -157,24 +211,31 @@ class Participant(models.Model):
         pr = params.personal_ranking
         self.personal_score = 0
 
-        rounds = Round.objects.filter(pf_number__lte=pr['up_to_fight'])
+        rounds = Round.objects.filter(pf_number__lte=pr["up_to_fight"])
 
-        for r in (rounds.filter(reporter=self)):
-            if r.score_reporter > pr['rep_threshold']:
-                self.personal_score += (r.score_reporter - pr['rep_threshold']) * pr['rep_coeff']
+        for r in rounds.filter(reporter=self):
+            if r.score_reporter > pr["rep_threshold"]:
+                self.personal_score += (r.score_reporter - pr["rep_threshold"]) * pr[
+                    "rep_coeff"
+                ]
 
-        for r in (rounds.filter(opponent=self)):
-            if r.score_opponent > pr['opp_threshold']:
-                self.personal_score += (r.score_opponent - pr['opp_threshold']) * pr['opp_coeff']
+        for r in rounds.filter(opponent=self):
+            if r.score_opponent > pr["opp_threshold"]:
+                self.personal_score += (r.score_opponent - pr["opp_threshold"]) * pr[
+                    "opp_coeff"
+                ]
 
-        for r in (rounds.filter(reviewer=self)):
-            if r.score_reviewer > pr['rev_threshold']:
-                self.personal_score += (r.score_reviewer - pr['rev_threshold']) * pr['rev_coeff']
+        for r in rounds.filter(reviewer=self):
+            if r.score_reviewer > pr["rev_threshold"]:
+                self.personal_score += (r.score_reviewer - pr["rev_threshold"]) * pr[
+                    "rev_coeff"
+                ]
 
     @classmethod
     def fast_team_ranking(cls, team):
-        participants = Participant.objects.filter(role='TM', team=team) | Participant.objects.filter(role='TC',
-                                                                                                     team=team)
+        participants = Participant.objects.filter(
+            role="TM", team=team
+        ) | Participant.objects.filter(role="TC", team=team)
         return sorted(participants, key=lambda x: x.total_points)[::-1]
 
 
@@ -182,9 +243,10 @@ class Problem(models.Model):
     """
     This model represents one of the 17 problems
     """
+
     name = models.CharField(max_length=50, default=None)
     description = models.TextField(max_length=4096, default=None)
-    author = models.CharField(blank=True, max_length=128, default='')
+    author = models.CharField(blank=True, max_length=128, default="")
 
     mean_score_of_reporters = models.FloatField(default=0.0, editable=False)
     mean_score_of_opponents = models.FloatField(default=0.0, editable=False)
@@ -208,36 +270,67 @@ class Problem(models.Model):
         for round in rounds:
             if len(JuryGrade.objects.filter(round=round)) > 0:
                 if round.reporter_team and round.score_reporter:
-                    reporters.append({"name": round.reporter_team.name, "round": round, "value": round.score_reporter})
+                    reporters.append(
+                        {
+                            "name": round.reporter_team.name,
+                            "round": round,
+                            "value": round.score_reporter,
+                        }
+                    )
                 if round.opponent_team and round.score_opponent:
-                    opponents.append({"name": round.opponent_team.name, "round": round, "value": round.score_opponent})
+                    opponents.append(
+                        {
+                            "name": round.opponent_team.name,
+                            "round": round,
+                            "value": round.score_opponent,
+                        }
+                    )
                 if round.reviewer_team and round.score_reviewer:
-                    reviewers.append({"name": round.reviewer_team.name, "round": round, "value": round.score_reviewer})
+                    reviewers.append(
+                        {
+                            "name": round.reviewer_team.name,
+                            "round": round,
+                            "value": round.score_reviewer,
+                        }
+                    )
 
         # TODO: replace "value" with "score" for better readability
         # TODO: the algorithm looks EXTRA WEIRD. Probably all this code should be refactored
         # use this to compute the mean grades
-        meangrades = {"report": mean([reporter["value"] for reporter in reporters]),
-                      "opposition": mean([opponent["value"] for opponent in opponents]),
-                      "review": mean([reviewer["value"] for reviewer in reviewers])}
+        meangrades = {
+            "report": mean([reporter["value"] for reporter in reporters]),
+            "opposition": mean([opponent["value"] for opponent in opponents]),
+            "review": mean([reviewer["value"] for reviewer in reviewers]),
+        }
 
         if meangradesonly != False:
             return meangrades
         # then, reorder that list per teams
-        myteamsnames = list(sorted([elt["name"] for elt in reporters + opponents + reviewers]))
+        myteamsnames = list(
+            sorted([elt["name"] for elt in reporters + opponents + reviewers])
+        )
 
         teamresults = []
         for name in myteamsnames:
             if name not in [teamresult["name"] for teamresult in teamresults]:
                 teamresult = {"name": name}
-                reports = [{"round": reporter["round"], "value": reporter["value"]} for reporter in reporters if
-                           reporter["name"] == name]
+                reports = [
+                    {"round": reporter["round"], "value": reporter["value"]}
+                    for reporter in reporters
+                    if reporter["name"] == name
+                ]
 
-                oppositions = [{"round": opponent["round"], "value": opponent["value"]} for opponent in opponents if
-                               opponent["name"] == name]
+                oppositions = [
+                    {"round": opponent["round"], "value": opponent["value"]}
+                    for opponent in opponents
+                    if opponent["name"] == name
+                ]
 
-                reviews = [{"round": reviewer["round"], "value": reviewer["value"]} for reviewer in reviewers if
-                           reviewer["name"] == name]
+                reviews = [
+                    {"round": reviewer["round"], "value": reviewer["value"]}
+                    for reviewer in reviewers
+                    if reviewer["name"] == name
+                ]
 
                 teamresult["reports"] = reports
                 teamresult["oppositions"] = oppositions
@@ -262,13 +355,21 @@ class Team(models.Model):
     This model represent a team, to which all the participants belong to
     """
 
-    POOL_CHOICES = (('A', 'Pool A'), ('B', 'Pool B'), ('O', 'Not attributed'))
+    POOL_CHOICES = (("A", "Pool A"), ("B", "Pool B"), ("O", "Not attributed"))
 
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50, null=True, blank=True, default=None)
-    IOC = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True,
-                               related_name='Team_' + params.instance_name, verbose_name="Admin")
-    pool = models.CharField(max_length=1, choices=POOL_CHOICES, verbose_name='Pool', null=True, blank=True)
+    IOC = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="Team_" + params.instance_name,
+        verbose_name="Admin",
+    )
+    pool = models.CharField(
+        max_length=1, choices=POOL_CHOICES, verbose_name="Pool", null=True, blank=True
+    )
 
     total_points = models.FloatField(default=0.0, editable=False)
     semi_points = models.FloatField(default=0.0, editable=False)
@@ -300,7 +401,9 @@ class Team(models.Model):
         netrej = 0
         for pf in selective_fights_and_semifinals:
             netrej += len(eternalrejections.filter(round__pf_number=pf))
-            beforetactical.append(3.0 - params.reject_malus * max(0, (netrej - params.netreject_max)))
+            beforetactical.append(
+                3.0 - params.reject_malus * max(0, (netrej - params.netreject_max))
+            )
 
         # get all the tactical rejections
         rejections = TacticalRejection.objects.filter(round__reporter_team=self)
@@ -308,18 +411,35 @@ class Team(models.Model):
         prescoeffs = []
         npenalities = 0
         if verbose:
-            print(("=" * 20, f"Tactical Rejection Penalites for Team {self.name}", "=" * 20))
+            print(
+                (
+                    "=" * 20,
+                    f"Tactical Rejection Penalites for Team {self.name}",
+                    "=" * 20,
+                )
+            )
 
         for ind, pf in enumerate(selective_fights_and_semifinals):
-            pfrejections = [rejection for rejection in rejections if rejection.round.pf_number == pf]
+            pfrejections = [
+                rejection for rejection in rejections if rejection.round.pf_number == pf
+            ]
             if verbose:
-                print(("%i tactical rejections by Team %s in Physics Fight %i" % (len(pfrejections), self, pf)))
+                print(
+                    (
+                        "%i tactical rejections by Team %s in Physics Fight %i"
+                        % (len(pfrejections), self, pf)
+                    )
+                )
             if len(pfrejections) > params.npfreject_max:
                 npenalities += len(pfrejections) - params.npfreject_max
             if verbose:
                 if npenalities > 0:
-                    print(("Penality of %.1f points on the Reporter Coefficient" % float(
-                        params.reject_malus * npenalities)))
+                    print(
+                        (
+                            "Penality of %.1f points on the Reporter Coefficient"
+                            % float(params.reject_malus * npenalities)
+                        )
+                    )
                 else:
                     print("No penality")
             prescoeffs.append(beforetactical[ind] - params.reject_malus * npenalities)
@@ -370,7 +490,11 @@ class Team(models.Model):
 
         if self.is_in_semi:
             semirounds = Round.objects.filter(
-                pf_number__range=(params.npf + 1, params.npf + params.semifinals_quantity))
+                pf_number__range=(
+                    params.npf + 1,
+                    params.npf + params.semifinals_quantity,
+                )
+            )
             self.semi_points = self.get_scores_for_rounds(semirounds)[0]
             if not params.reset_points_before_semi:
                 self.semi_points += self.total_points
@@ -415,7 +539,9 @@ class Team(models.Model):
         for eternal_rejection in eternal_rejections:
             if eternal_rejection.round.pf_number < pf_number:
                 if verbose:
-                    print(f"Team {self.name} rejected eternally problem {eternal_rejection.problem.name}")
+                    print(
+                        f"Team {self.name} rejected eternally problem {eternal_rejection.problem.name}"
+                    )
 
                 reject.append(eternal_rejection.problem)
 
@@ -442,7 +568,7 @@ class Team(models.Model):
 
 class Room(models.Model):
     name = models.CharField(max_length=50)
-    link = models.CharField(max_length=2083, blank=True, default='')
+    link = models.CharField(max_length=2083, blank=True, default="")
 
     def __unicode__(self):
         return self.name
@@ -459,31 +585,37 @@ class Room(models.Model):
 
 
 class Jury(models.Model):
-    name = models.CharField(max_length=50, verbose_name='Name')
-    surname = models.CharField(max_length=50, verbose_name='Surname')
+    name = models.CharField(max_length=50, verbose_name="Name")
+    surname = models.CharField(max_length=50, verbose_name="Surname")
 
     def fullname(self):
         """
         :return: return the full name of the jury member
         """
-        return f'{self.name} {self.surname}'
+        return f"{self.name} {self.surname}"
 
     def __unicode__(self):
         return self.fullname()
 
     email = models.EmailField(
-        help_text='This address will be used to send the participant every important infos about the tournament.',
-        verbose_name='Email', blank=True)
-    affiliation = models.CharField(max_length=100, blank=True, verbose_name='Affiliation to display',
-                                   help_text='Will be used for export (badges and web).')
-    team = models.ForeignKey('Team', null=True, blank=True)
+        help_text="This address will be used to send the participant every important infos about the tournament.",
+        verbose_name="Email",
+        blank=True,
+    )
+    affiliation = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Affiliation to display",
+        help_text="Will be used for export (badges and web).",
+    )
+    team = models.ForeignKey("Team", null=True, blank=True)
     # TODO: unhardcode PF number!
-    pf1 = models.BooleanField(default=False, verbose_name='PF 1')
-    pf2 = models.BooleanField(default=False, verbose_name='PF 2')
-    pf3 = models.BooleanField(default=False, verbose_name='PF 3')
-    pf4 = models.BooleanField(default=False, verbose_name='PF 4')
-    final = models.BooleanField(default=False, verbose_name='Final')
-    remark = models.TextField(blank=True, verbose_name='Remarks')
+    pf1 = models.BooleanField(default=False, verbose_name="PF 1")
+    pf2 = models.BooleanField(default=False, verbose_name="PF 2")
+    pf3 = models.BooleanField(default=False, verbose_name="PF 3")
+    pf4 = models.BooleanField(default=False, verbose_name="PF 4")
+    final = models.BooleanField(default=False, verbose_name="Final")
+    remark = models.TextField(blank=True, verbose_name="Remarks")
 
     class Meta:
         verbose_name = "Juror"
@@ -491,21 +623,40 @@ class Jury(models.Model):
 
 class Round(models.Model):
     pf_number = models.IntegerField(
-        choices=(((ind + 1, params.fights['names'][ind]) for ind in range(npf_tot))),
-        default=None
+        choices=(((ind + 1, params.fights["names"][ind]) for ind in range(npf_tot))),
+        default=None,
     )
     round_number = models.IntegerField(
-        choices=(((ind + 1, 'Round ' + str(ind + 1)) for ind in range(params.max_rounds_in_pf))),
-        default=None
+        choices=(
+            (
+                (ind + 1, "Round " + str(ind + 1))
+                for ind in range(params.max_rounds_in_pf)
+            )
+        ),
+        default=None,
     )
     room = models.ForeignKey(Room)
-    reporter_team = models.ForeignKey(Team, related_name='reporterteam', blank=True, null=True)
-    opponent_team = models.ForeignKey(Team, related_name='opponentteam', blank=True, null=True)
-    reviewer_team = models.ForeignKey(Team, related_name='reviewerteam', blank=True, null=True)
-    reporter = models.ForeignKey(Participant, related_name='reporter_name_1', blank=True, null=True)
-    reporter_2 = models.ForeignKey(Participant, related_name='reporter_name_2', blank=True, null=True)
-    opponent = models.ForeignKey(Participant, related_name='opponent_name', blank=True, null=True)
-    reviewer = models.ForeignKey(Participant, related_name='reviewer_name', blank=True, null=True)
+    reporter_team = models.ForeignKey(
+        Team, related_name="reporterteam", blank=True, null=True
+    )
+    opponent_team = models.ForeignKey(
+        Team, related_name="opponentteam", blank=True, null=True
+    )
+    reviewer_team = models.ForeignKey(
+        Team, related_name="reviewerteam", blank=True, null=True
+    )
+    reporter = models.ForeignKey(
+        Participant, related_name="reporter_name_1", blank=True, null=True
+    )
+    reporter_2 = models.ForeignKey(
+        Participant, related_name="reporter_name_2", blank=True, null=True
+    )
+    opponent = models.ForeignKey(
+        Participant, related_name="opponent_name", blank=True, null=True
+    )
+    reviewer = models.ForeignKey(
+        Participant, related_name="reviewer_name", blank=True, null=True
+    )
     problem_presented = models.ForeignKey(Problem, blank=True, null=True)
     submitted_date = models.DateTimeField(default=timezone.now, blank=True, null=True)
 
@@ -519,25 +670,36 @@ class Round(models.Model):
 
     # Bonus points for the reporters team are stored in the Round
     # at which the team was reporting
-    bonus_points_reporter = models.FloatField(default=0.0, editable=params.manual_bonus_points)
+    bonus_points_reporter = models.FloatField(
+        default=0.0, editable=params.manual_bonus_points
+    )
 
     def __unicode__(self):
         try:
-            fight_name = params.fights['names'][self.pf_number - 1]
+            fight_name = params.fights["names"][self.pf_number - 1]
         except Exception:
             # TODO: send a report to the admins!
-            fight_name = 'Unknown Fight (possibly an error!)'
+            fight_name = "Unknown Fight (possibly an error!)"
 
-        return fight_name + " | Round %i" % self.round_number + (
-            f" | Room {self.room.name}" if self.pf_number <= params.npf else "")
+        return (
+            fight_name
+            + " | Round %i" % self.round_number
+            + (f" | Room {self.room.name}" if self.pf_number <= params.npf else "")
+        )
 
     def save(self, *args, **kwargs):
         jurygrades = JuryGrade.objects.filter(round=self)
         print(("Update scores for", self))
 
-        reporter_grades = list(sorted([jurygrade.grade_reporter for jurygrade in jurygrades]))
-        opponent_grades = list(sorted([jurygrade.grade_opponent for jurygrade in jurygrades]))
-        reviewer_grades = list(sorted([jurygrade.grade_reviewer for jurygrade in jurygrades]))
+        reporter_grades = list(
+            sorted([jurygrade.grade_reporter for jurygrade in jurygrades])
+        )
+        opponent_grades = list(
+            sorted([jurygrade.grade_opponent for jurygrade in jurygrades])
+        )
+        reviewer_grades = list(
+            sorted([jurygrade.grade_reviewer for jurygrade in jurygrades])
+        )
 
         ngrades = min(len(reporter_grades), len(opponent_grades), len(reviewer_grades))
         if ngrades > 1:
@@ -545,16 +707,24 @@ class Round(models.Model):
             self.score_opponent = special_mean(opponent_grades)
             self.score_reviewer = special_mean(reviewer_grades)
 
-            prescoeff = self.reporter_team.presentation_coefficients()[self.pf_number - 1]
+            prescoeff = self.reporter_team.presentation_coefficients()[
+                self.pf_number - 1
+            ]
 
             self.points_reporter = self.score_reporter * prescoeff
             self.points_opponent = self.score_opponent * 2.0
             self.points_reviewer = self.score_reviewer
 
             if params.score_precision != None:
-                self.points_reporter = round(self.points_reporter, params.score_precision)
-                self.points_opponent = round(self.points_opponent, params.score_precision)
-                self.points_reviewer = round(self.points_reviewer, params.score_precision)
+                self.points_reporter = round(
+                    self.points_reporter, params.score_precision
+                )
+                self.points_opponent = round(
+                    self.points_opponent, params.score_precision
+                )
+                self.points_reviewer = round(
+                    self.points_reviewer, params.score_precision
+                )
 
         super(Round, self).save(*args, **kwargs)
 
@@ -607,7 +777,11 @@ class Round(models.Model):
         next_round.reviewer_team = self.reporter_team
 
         # 2-fights
-        if params.optional_reviewers and next_round.round_number == 2 and next_round.reviewer_team != None:
+        if (
+            params.optional_reviewers
+            and next_round.round_number == 2
+            and next_round.reviewer_team != None
+        ):
             if next_round.reporter_team is None:
                 next_round.reporter_team = next_round.reviewer_team
                 next_round.reviewer_team = None
@@ -639,29 +813,18 @@ class Round(models.Model):
         return next_round
 
     class Meta:
-        permissions = (
-            ("update_all", "Can see and trigger update_all links"),
-        )
+        permissions = (("update_all", "Can see and trigger update_all links"),)
 
 
 class JuryGrade(models.Model):
     round = models.ForeignKey(Round, null=True)
     jury = models.ForeignKey(Jury)
 
-    grade_reporter = models.IntegerField(
-        choices=grade_choices,
-        default=None
-    )
+    grade_reporter = models.IntegerField(choices=grade_choices, default=None)
 
-    grade_opponent = models.IntegerField(
-        choices=grade_choices,
-        default=None
-    )
+    grade_opponent = models.IntegerField(choices=grade_choices, default=None)
 
-    grade_reviewer = models.IntegerField(
-        choices=grade_choices,
-        default=None
-    )
+    grade_reviewer = models.IntegerField(choices=grade_choices, default=None)
 
     def __unicode__(self):
         return f"Grade of {self.jury.name}"
@@ -670,9 +833,24 @@ class JuryGrade(models.Model):
         print(("=" * 36))
         print(f"Grade of {self.jury.name}")
         print((self.round))
-        print(("Reporter %s from %s : %i" % (self.round.name_reporter, self.round.reporter, self.grade_reporter)))
-        print(("Opponent %s from %s : %i" % (self.round.name_opponent, self.round.opponent, self.grade_opponent)))
-        print(("Reviewer %s from %s : %i" % (self.round.name_reviewer, self.round.reviewer, self.grade_reviewer)))
+        print(
+            (
+                "Reporter %s from %s : %i"
+                % (self.round.name_reporter, self.round.reporter, self.grade_reporter)
+            )
+        )
+        print(
+            (
+                "Opponent %s from %s : %i"
+                % (self.round.name_opponent, self.round.opponent, self.grade_opponent)
+            )
+        )
+        print(
+            (
+                "Reviewer %s from %s : %i"
+                % (self.round.name_reviewer, self.round.reviewer, self.grade_reviewer)
+            )
+        )
 
 
 class TacticalRejection(models.Model):
@@ -710,8 +888,12 @@ def update_points_condition(sender, instance, **kwargs):
 
 def update_points(sender, instance, **kwargs):
     print(f"Updating Round {instance}")
-    if instance.reporter_team is not None and instance.opponent_team is not None and (
-            instance.reviewer_team is not None or params.optional_reviewers) and instance.problem_presented is not None:
+    if (
+        instance.reporter_team is not None
+        and instance.opponent_team is not None
+        and (instance.reviewer_team is not None or params.optional_reviewers)
+        and instance.problem_presented is not None
+    ):
         teams = [instance.reporter_team, instance.opponent_team, instance.reviewer_team]
         # then compute teams (and participants) scores
         for team in teams:
@@ -727,10 +909,13 @@ class SiteConfiguration(SingletonModel):
     display_link_to_final_on_ranking_page = models.BooleanField(default=False)
     display_final_ranking_on_ranking_page = models.BooleanField(default=False)
 
-    do_not_display_tactical_rejections = models.BooleanField(default=False, editable=params.enable_tactical_rejections)
+    do_not_display_tactical_rejections = models.BooleanField(
+        default=False, editable=params.enable_tactical_rejections
+    )
 
-    display_eternal_rejections_on_team_page = models.BooleanField(default=True,
-                                                                  editable=params.enable_eternal_rejections)
+    display_eternal_rejections_on_team_page = models.BooleanField(
+        default=True, editable=params.enable_eternal_rejections
+    )
 
     update_scores_manually = models.BooleanField(default=False)
     image_link_URL = models.URLField(default="http://blueballfixed.ytmnd.com/")
@@ -759,7 +944,9 @@ def update_bonus_points():
 
     for round in rounds.filter(round_number=2):
 
-        thispfrounds = Round.objects.filter(pf_number=round.pf_number).filter(room=round.room)
+        thispfrounds = Round.objects.filter(pf_number=round.pf_number).filter(
+            room=round.room
+        )
         thispfteams = get_involved_teams_dict(thispfrounds)
 
         # If a team (probably a reviewer) is not stated - just omit it
@@ -772,8 +959,10 @@ def update_bonus_points():
             continue
 
         bonuspts = {team: 0.0 for team in thispfteams}
-        points_dict = {team: team.get_scores_for_rounds(rounds=thispfrounds, include_bonus=False) for team in
-                       thispfteams}
+        points_dict = {
+            team: team.get_scores_for_rounds(rounds=thispfrounds, include_bonus=False)
+            for team in thispfteams
+        }
 
         # get teams sorted by total points for the physics fight
         team_podium = sorted(thispfteams, key=lambda t: points_dict[t], reverse=True)
@@ -791,14 +980,21 @@ def update_bonus_points():
             # do not affect the .filter() condition
             # and, moreover, each round is edited only once
             for team in team_podium:
-                round_with_report = thispfrounds.filter(pf_number=round.pf_number, reporter_team=team)
+                round_with_report = thispfrounds.filter(
+                    pf_number=round.pf_number, reporter_team=team
+                )
                 if round_with_report.count() == 1:
                     # We suppose that one team can be a reporter once per PF
                     round_with_report = round_with_report[0]
-                    if round_with_report.bonus_points_reporter != bonuspts[team] * params.fights['bonus_multipliers'][
-                        round.pf_number - 1]:
-                        round_with_report.bonus_points_reporter = bonuspts[team] * params.fights['bonus_multipliers'][
-                            round.pf_number - 1]
+                    if (
+                        round_with_report.bonus_points_reporter
+                        != bonuspts[team]
+                        * params.fights["bonus_multipliers"][round.pf_number - 1]
+                    ):
+                        round_with_report.bonus_points_reporter = (
+                            bonuspts[team]
+                            * params.fights["bonus_multipliers"][round.pf_number - 1]
+                        )
                         # TODO: get rid of save()
                         round_with_report.save()
 
@@ -858,4 +1054,8 @@ def update_all(sender, **kwargs):
         for pb in Problem.objects.all():
             pb.update_scores()
 
-    return "Teams, participants and problems updated in ", int(time.time() - old_time), " seconds !"
+    return (
+        "Teams, participants and problems updated in ",
+        int(time.time() - old_time),
+        " seconds !",
+    )

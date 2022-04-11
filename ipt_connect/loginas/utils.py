@@ -25,16 +25,20 @@ def login_as(user, request, store_original_user=True):
     original_user_pk = request.user.pk
 
     # Find a suitable backend.
-    if not hasattr(user, 'backend'):
+    if not hasattr(user, "backend"):
         for backend in django_settings.AUTHENTICATION_BACKENDS:
             if user == load_backend(backend).get_user(user.pk):
                 user.backend = backend
                 break
 
-    if not hasattr(user, 'backend'):
+    if not hasattr(user, "backend"):
         return
 
-    signal_was_connected = False if la_settings.UPDATE_LAST_LOGIN else user_logged_in.disconnect(update_last_login)
+    signal_was_connected = (
+        False
+        if la_settings.UPDATE_LAST_LOGIN
+        else user_logged_in.disconnect(update_last_login)
+    )
 
     try:
         # Actually log user in
@@ -45,8 +49,13 @@ def login_as(user, request, store_original_user=True):
             user_logged_in.connect(update_last_login)
     # Set a flag on the session
     if store_original_user:
-        messages.warning(request, la_settings.MESSAGE_LOGIN_SWITCH.format(username=user.__dict__[username_field]),
-                         extra_tags=la_settings.MESSAGE_EXTRA_TAGS)
+        messages.warning(
+            request,
+            la_settings.MESSAGE_LOGIN_SWITCH.format(
+                username=user.__dict__[username_field]
+            ),
+            extra_tags=la_settings.MESSAGE_EXTRA_TAGS,
+        )
         request.session[la_settings.USER_SESSION_FLAG] = signer.sign(original_user_pk)
 
 
@@ -63,11 +72,18 @@ def restore_original_login(request):
     try:
         original_user_pk = signer.unsign(
             original_session,
-            max_age=timedelta(days=la_settings.USER_SESSION_DAYS_TIMESTAMP).total_seconds()
+            max_age=timedelta(
+                days=la_settings.USER_SESSION_DAYS_TIMESTAMP
+            ).total_seconds(),
         )
         user = get_user_model().objects.get(pk=original_user_pk)
-        messages.info(request, la_settings.MESSAGE_LOGIN_REVERT.format(username=user.__dict__[username_field]),
-                      extra_tags=la_settings.MESSAGE_EXTRA_TAGS)
+        messages.info(
+            request,
+            la_settings.MESSAGE_LOGIN_REVERT.format(
+                username=user.__dict__[username_field]
+            ),
+            extra_tags=la_settings.MESSAGE_EXTRA_TAGS,
+        )
         login_as(user, request, store_original_user=False)
         if la_settings.USER_SESSION_FLAG in request.session:
             del request.session[la_settings.USER_SESSION_FLAG]

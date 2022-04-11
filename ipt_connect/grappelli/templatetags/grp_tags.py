@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import json
+
 # python imports
 from functools import wraps
 
@@ -34,8 +35,8 @@ class do_get_generic_objects(template.Node):
 
     def render(self, context):
         objects = {}
-        for c in ContentType.objects.all().order_by('id'):
-            objects[c.id] = {'pk': c.id, 'app': c.app_label, 'model': c.model}
+        for c in ContentType.objects.all().order_by("id"):
+            objects[c.id] = {"pk": c.id, "app": c.app_label, "model": c.model}
         return json.dumps(objects)
 
 
@@ -83,17 +84,17 @@ def get_admin_url():
 
 @register.simple_tag
 def get_date_format():
-    return get_format('DATE_INPUT_FORMATS')[0]
+    return get_format("DATE_INPUT_FORMATS")[0]
 
 
 @register.simple_tag
 def get_time_format():
-    return get_format('TIME_INPUT_FORMATS')[0]
+    return get_format("TIME_INPUT_FORMATS")[0]
 
 
 @register.simple_tag
 def get_datetime_format():
-    return get_format('DATETIME_INPUT_FORMATS')[0]
+    return get_format("DATETIME_INPUT_FORMATS")[0]
 
 
 @register.simple_tag
@@ -125,6 +126,7 @@ def classpath(obj):
 
 # FORMSETSORT FOR SORTABLE INLINES
 
+
 @register.filter
 def formsetsort(formset, arg):
     """
@@ -148,6 +150,7 @@ def formsetsort(formset, arg):
 
 
 # RELATED LOOKUPS
+
 
 def safe_json_else_list_tag(f):
     """
@@ -183,6 +186,7 @@ def get_related_lookup_fields_generic(model_admin):
 
 # AUTOCOMPLETES
 
+
 @safe_json_else_list_tag
 def get_autocomplete_lookup_fields_fk(model_admin):
     return model_admin.autocomplete_lookup_fields.get("fk", [])
@@ -217,11 +221,15 @@ def admin_list_filter(cl, spec):
         tpl = get_template(cl.model_admin.change_list_filter_template)
     except:
         tpl = get_template(spec.template)
-    return tpl.render(Context({
-        'title': spec.title,
-        'choices': list(spec.choices(cl)),
-        'spec': spec,
-    }))
+    return tpl.render(
+        Context(
+            {
+                "title": spec.title,
+                "choices": list(spec.choices(cl)),
+                "spec": spec,
+            }
+        )
+    )
 
 
 @register.simple_tag(takes_context=True)
@@ -229,17 +237,21 @@ def switch_user_dropdown(context):
     if SWITCH_USER:
         tpl = get_template("admin/includes_grappelli/switch_user_dropdown.html")
         request = context["request"]
-        session_user = request.session.get("original_user",
-                                           {"id": request.user.id, "username": request.user.get_username()})
+        session_user = request.session.get(
+            "original_user",
+            {"id": request.user.id, "username": request.user.get_username()},
+        )
         try:
             original_user = User.objects.get(pk=session_user["id"], is_staff=True)
         except User.DoesNotExist:
             return ""
         if SWITCH_USER_ORIGINAL(original_user):
-            object_list = [user for user in User.objects.filter(is_staff=True).exclude(pk=original_user.pk) if
-                           SWITCH_USER_TARGET(original_user, user)]
-            return tpl.render({
-                'request': request,
-                'object_list': object_list
-            })
+            object_list = [
+                user
+                for user in User.objects.filter(is_staff=True).exclude(
+                    pk=original_user.pk
+                )
+                if SWITCH_USER_TARGET(original_user, user)
+            ]
+            return tpl.render({"request": request, "object_list": object_list})
     return ""

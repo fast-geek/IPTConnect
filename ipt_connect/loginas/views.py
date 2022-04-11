@@ -22,21 +22,27 @@ except ImportError:
 def _load_module(path):
     """Code to load create user module. Copied off django-browserid."""
 
-    i = path.rfind('.')
-    module, attr = path[:i], path[i + 1:]
+    i = path.rfind(".")
+    module, attr = path[:i], path[i + 1 :]
 
     try:
         mod = import_module(module)
     except ImportError as e:
-        raise ImproperlyConfigured(f'Error importing CAN_LOGIN_AS function: {module}') from e
+        raise ImproperlyConfigured(
+            f"Error importing CAN_LOGIN_AS function: {module}"
+        ) from e
 
     except ValueError as e:
-        raise ImproperlyConfigured('Error importing CAN_LOGIN_AS' ' function. Is CAN_LOGIN_AS a' ' string?') from e
+        raise ImproperlyConfigured(
+            "Error importing CAN_LOGIN_AS" " function. Is CAN_LOGIN_AS a" " string?"
+        ) from e
 
     try:
         can_login_as = getattr(mod, attr)
     except AttributeError as exc:
-        raise ImproperlyConfigured('Module {0} does not define a {1} ' 'function.'.format(module, attr)) from exc
+        raise ImproperlyConfigured(
+            "Module {0} does not define a {1} " "function.".format(module, attr)
+        ) from exc
 
     return can_login_as
 
@@ -51,16 +57,24 @@ def user_login(request, user_id):
     elif hasattr(la_settings.CAN_LOGIN_AS, "__call__"):
         can_login_as = la_settings.CAN_LOGIN_AS
     else:
-        raise ImproperlyConfigured("The CAN_LOGIN_AS setting is neither a valid module nor callable.")
+        raise ImproperlyConfigured(
+            "The CAN_LOGIN_AS setting is neither a valid module nor callable."
+        )
 
     if user.is_superuser:
-        messages.error(request, _("You cannot log in as superusers."),
-                       extra_tags=la_settings.MESSAGE_EXTRA_TAGS)
+        messages.error(
+            request,
+            _("You cannot log in as superusers."),
+            extra_tags=la_settings.MESSAGE_EXTRA_TAGS,
+        )
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
     if not can_login_as(request, user):
-        messages.error(request, _("You do not have permission to do that."),
-                       extra_tags=la_settings.MESSAGE_EXTRA_TAGS)
+        messages.error(
+            request,
+            _("You do not have permission to do that."),
+            extra_tags=la_settings.MESSAGE_EXTRA_TAGS,
+        )
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
     login_as(user, request)
