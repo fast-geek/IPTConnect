@@ -160,7 +160,7 @@ if populate_db:  # populating the database
 
     Participant.objects.create(
         name='Jean',
-        surname=u'Valjeané',
+        surname='Valjeané',
         gender='M',
         email='toto@toto.com',
         birthdate='1900-01-31',

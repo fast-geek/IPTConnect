@@ -2,7 +2,7 @@ from django import forms
 from django.http import JsonResponse
 from django.utils.encoding import smart_unicode
 
-from models import Participant
+from .models import Participant
 
 
 # class RegisterForm(forms.ModelForm):

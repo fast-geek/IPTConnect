@@ -7,10 +7,10 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.utils.translation import get_language
 
-from cache_per_user import cache_per_user as cache_page
-from forms import UploadForm
-from model_SupplementaryMaterial import SupplementaryMaterial
-from models import *
+from .cache_per_user import cache_per_user as cache_page
+from .forms import UploadForm
+from .model_SupplementaryMaterial import SupplementaryMaterial
+from .models import *
 
 
 def home(request):
@@ -770,9 +770,9 @@ def rounds(request):
     render_data = {
         'params': params,
         'orderedroundsperroom': orderedroundsperroom,
-        'selective_fight_names': zip(
+        'selective_fight_names': list(zip(
             selective_fights, params.fights['names'][: params.npf]
-        ),
+        )),
         'sister_tournament_postfix': 'physics_fights',
     }
 
@@ -813,12 +813,12 @@ def rounds(request):
             )
         render_data.update(
             {
-                'semifinal_data': zip(
+                'semifinal_data': list(zip(
                     params.fights['names'][
                         params.npf : params.npf + params.semifinals_quantity
                     ],
                     semifinal_rounds,
-                )
+                ))
             }
         )
 
@@ -840,7 +840,7 @@ def round_detail(request, pk):
         raise Http404()
 
     # TODO: rewrite the following in pythonish way!!!
-    from tactics import make_old_fashioned_list_from_tactics_data
+    from .tactics import make_old_fashioned_list_from_tactics_data
 
     jurygrades = JuryGrade.objects.filter(round=round).order_by('jury__name')
     meangrades = []
@@ -905,7 +905,7 @@ def round_detail(request, pk):
 )
 @cache_page(cache_duration)
 def physics_fight_detail(request, pfid):
-    if float(pfid) not in range(1, npf_tot + 1):
+    if float(pfid) not in list(range(1, npf_tot + 1)):
         raise Http404()
     rounds = Round.objects.filter(pf_number=pfid)
     rooms = Room.objects.all().order_by('name')
@@ -928,7 +928,7 @@ def physics_fight_detail(request, pfid):
                 'juryroundsgrades': gradesdico[jury],
                 'name': jury.name + " " + jury.surname,
             }
-            for jury in gradesdico.keys()
+            for jury in list(gradesdico.keys())
         ]
         print(juryallgrades)
 
@@ -1001,7 +1001,7 @@ def create_summary(roomrounds, teams_involved=None, finished=None):
             summary_grades[team].append(sum(summary_grades[team][1:]))
 
         summary_grades = sorted(
-            summary_grades.items(), key=lambda x: x[1][-1], reverse=True
+            list(summary_grades.items()), key=lambda x: x[1][-1], reverse=True
         )
 
         if finished and params.display_pf_summary_bonus_points:
@@ -1026,8 +1026,8 @@ def rank_ordinal(value):
     else:
         t = ('th', 'st', 'nd', 'rd') + ('th',) * 6
         if value % 100 in (11, 12, 13):
-            return u"%d%s" % (value, t[0])
-        return u'%d%s' % (value, t[value % 10])
+            return "%d%s" % (value, t[0])
+        return '%d%s' % (value, t[value % 10])
 
 
 def create_ranking(teams):

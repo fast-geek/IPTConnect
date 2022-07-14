@@ -1,9 +1,9 @@
 # coding: utf8
 from django.conf.urls import url
 
-import parameters
-from forms import member_for_team
-from tactics import *
+from . import parameters
+from .forms import member_for_team
+from .tactics import *
 
 app_name = parameters.instance_name
 

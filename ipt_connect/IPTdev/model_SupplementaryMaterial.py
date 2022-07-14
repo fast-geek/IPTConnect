@@ -2,7 +2,7 @@
 
 from django.db import models
 
-import models as ipt_connect_models
+from . import models as ipt_connect_models
 
 
 class SupplementaryMaterial(models.Model):

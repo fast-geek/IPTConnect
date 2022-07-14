@@ -16,9 +16,9 @@ from django.utils.deconstruct import deconstructible
 from django.utils.encoding import iri_to_uri
 from solo.models import SingletonModel
 
-import func_mean as means
-import parameters as params
-from func_bonus import distribute_bonus_points
+from . import func_mean as means
+from . import parameters as params
+from .func_bonus import distribute_bonus_points
 
 # Useful static variables
 selective_fights = [i + 1 for i in range(params.npf)]
@@ -45,7 +45,7 @@ class UploadToPathAndRename(object):
         if instance.pk:
             filename = iri_to_uri(
                 replace(
-                    (u'{}_{}_{}.{}').format(
+                    ('{}_{}_{}.{}').format(
                         instance.team, instance.surname, instance.name, ext
                     ),
                     ' ',
@@ -963,7 +963,7 @@ class SiteConfiguration(SingletonModel):
     image_repeat_count = models.IntegerField(default=6)
 
     def __unicode__(self):
-        return u"Site Configuration"
+        return "Site Configuration"
 
     class Meta:
         verbose_name = "Site Configuration"
@@ -994,7 +994,7 @@ def update_bonus_points():
         if params.optional_reviewers:
             thispfteams.pop(None, None)
 
-        thispfteams = thispfteams.keys()
+        thispfteams = list(thispfteams.keys())
 
         if thispfrounds.count() != len(thispfteams):
             continue
@@ -1060,7 +1060,7 @@ def remove_phantom_grades():
         if grade not in rgrades:
             i += 1
             grade.delete()
-    print("I removed %i phantom grades..." % i)
+    print(("I removed %i phantom grades..." % i))
 
 
 update_signal = Signal()

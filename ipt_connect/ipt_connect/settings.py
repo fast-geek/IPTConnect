@@ -28,7 +28,7 @@ SERVER_EMAIL = 'XXX'
 
 ADMINS = (('XXX', 'XXX@XXX'),)
 
-ALLOWED_HOSTS = [u"XXX", u"127.0.0.1", u"localhost"]
+ALLOWED_HOSTS = ["XXX", "127.0.0.1", "localhost"]
 
 # Place all the names of the tournaments here
 # Default tournament (i.e. the one displayed on the main page) should be the first
