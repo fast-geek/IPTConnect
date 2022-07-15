@@ -1,6 +1,6 @@
 from django import forms
 from django.http import JsonResponse
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 
 from .models import Participant
 
@@ -31,7 +31,7 @@ def member_for_team(request):
         if request.GET and "team_id" in request.GET:
             objs = Participant.objects.filter(team=request.GET["team_id"])
             for o in objs:
-                res.append({"id": o.id, "name": smart_unicode(o)})
+                res.append({"id": o.id, "name": smart_text(o)})
 
         # return HttpResponse(json.dumps(res), content_type="application/json")
     return JsonResponse({"res": res})

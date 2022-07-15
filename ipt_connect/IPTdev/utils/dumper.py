@@ -4,7 +4,7 @@ from urllib.request import urlopen
 
 import git
 
-from .find_links import unique_url
+from find_links import unique_url
 
 dir_path_repo = str(os.getcwd())
 repo = git.Repo(dir_path_repo[:-24])
@@ -20,4 +20,4 @@ for u in unique_url:
         with open(
             dir_path_dump + '/' + urllib.parse.quote(u).replace('/', '_') + '.html', 'w'
         ) as page:
-            page.writelines(urlopen(u).read())
+            page.writelines(urlopen(u).read().decode('utf-8'))

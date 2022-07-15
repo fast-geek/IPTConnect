@@ -1,7 +1,6 @@
 # coding: utf8
 import os
 import time
-from string import replace
 from uuid import uuid4
 
 from django.contrib.auth.models import User
@@ -44,7 +43,7 @@ class UploadToPathAndRename(object):
         # get filename
         if instance.pk:
             filename = iri_to_uri(
-                replace(
+                str.replace(
                     ('{}_{}_{}.{}').format(
                         instance.team, instance.surname, instance.name, ext
                     ),
