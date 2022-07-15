@@ -171,6 +171,9 @@ class Participant(models.Model):
         """
         return self.fullname()
 
+    def __str__(self):
+        return self.__unicode__()
+
     def update_scores(self):
         # print "Updating scores for", self
         rounds_as_reporter = Round.objects.filter(reporter=self)
@@ -253,6 +256,9 @@ class Problem(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def __str__(self):
+        return self.__unicode__()
 
     def status(self, verbose=True, meangradesonly=False):
         """
@@ -394,6 +400,9 @@ class Team(models.Model):
     def __unicode__(self):
 
         return self.name
+
+    def __str__(self):
+        return self.__unicode__()
 
     def presentation_coefficients(self, verbose=False):
         """
@@ -603,6 +612,9 @@ class Room(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.__unicode__()
+
     @property
     def get_link(self):
         return self.link
@@ -626,6 +638,9 @@ class Jury(models.Model):
 
     def __unicode__(self):
         return self.fullname()
+
+    def __str__(self):
+        return self.__unicode__()
 
     email = models.EmailField(
         help_text='This address will be used to send the participant every important infos about the tournament.',
@@ -716,6 +731,9 @@ class Round(models.Model):
             + " | Round %i" % self.round_number
             + (" | Room " + self.room.name if self.pf_number <= params.npf else "")
         )
+
+    def __str__(self):
+        return self.__unicode__()
 
     def save(self, *args, **kwargs):
         jurygrades = JuryGrade.objects.filter(round=self)
@@ -855,6 +873,9 @@ class JuryGrade(models.Model):
     def __unicode__(self):
         return "Grade of %s" % self.jury.name
 
+    def __str__(self):
+        return self.__unicode__()
+
     def info(self):
         print(("=" * 36))
         print(("Grade of %s" % self.jury.name))
@@ -891,6 +912,9 @@ class TacticalRejection(models.Model):
     def __unicode__(self):
         return "Problem rejected : %s" % self.problem.pk
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class EternalRejection(models.Model):
     round = models.ForeignKey(Round, null=True)
@@ -904,6 +928,9 @@ class EternalRejection(models.Model):
     def __unicode__(self):
         return "Problem rejected : %s" % self.problem.pk
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class AprioriRejection(models.Model):
     team = models.ForeignKey(Team, null=True)
@@ -912,6 +939,9 @@ class AprioriRejection(models.Model):
     def __unicode__(self):
         # TODO: also print the Team
         return "Problem rejected : %s" % self.problem.pk
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 # method for updating Teams and Participants when rounds are saved
@@ -963,6 +993,9 @@ class SiteConfiguration(SingletonModel):
 
     def __unicode__(self):
         return "Site Configuration"
+
+    def __str__(self):
+        return self.__unicode__()
 
     class Meta:
         verbose_name = "Site Configuration"
